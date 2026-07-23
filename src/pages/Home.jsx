@@ -1,16 +1,35 @@
 import { Button } from "@/components/ui/button";
 import playstation from "../assets/PlayStation 5 Digital-Photoroom.png";
+import BlurText from "@/components/ui/BlurText";
 
 const Home = () => {
+  const handleAnimationComplete = () => {
+    console.log("Animation completed!");
+  };
+
   return (
     <section className="h-4/5 p-12">
       <section className="h-full w-full bg-primary rounded-xl overflow-hidden p-12 flex items-center justify-between">
         <article id="left" className="space-y-1.5 w-2/3 ">
-          <h1 className="capitalize text-6xl text-secondary tracking-wide font-sora">
-            Elevate your online journey
+          <h1>
+            <BlurText
+              text="Every Tech One Destination"
+              delay={10}
+              animateBy="words"
+              direction="top"
+              onAnimationComplete={handleAnimationComplete}
+              className="capitalize text-6xl text-secondary tracking-wide font-sora"
+            />
           </h1>
           <h2 className="capitalize text-5xl text-secondary tracking-wide font-sora mb-4">
-            AI-Powered Tech Marketplace
+            <BlurText
+              text="AI-Powered Tech Marketplace"
+              delay={10}
+              animateBy="letters"
+              direction="top"
+              onAnimationComplete={handleAnimationComplete}
+              className="capitalize text-5xl text-secondary tracking-wide font-sora"
+            />
           </h2>
           <p className="text-muted/80 w-4/5 text-lg mb-8">
             Shop premium PC components, laptops, gaming gear, software,
