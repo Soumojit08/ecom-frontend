@@ -5,14 +5,14 @@ import { useState } from "react";
 import Logo from "../../public/logo.svg";
 
 const Navbar = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleLogin = () => {
     setIsLoggedIn(!isLoggedIn);
   };
 
   return (
-    <header className="w-full border-b px-8 py-4">
+    <header className="w-full border-b px-12 py-4">
       <nav className="grid grid-cols-3 items-center">
         <section id="left" className="flex items-center">
           <Link to="/" className="uppercase tracking-wider font-barlow">
