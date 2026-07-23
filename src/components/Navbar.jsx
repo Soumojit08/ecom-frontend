@@ -2,6 +2,7 @@ import { Heart, ShoppingCart, User } from "lucide-react";
 import { Button } from "./ui/button";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import Logo from "../../public/logo.svg";
 
 const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(true);
@@ -11,14 +12,16 @@ const Navbar = () => {
   };
 
   return (
-    <header className="w-full py-4 px-8 border-b">
-      <nav className="flex items-center justify-between">
-        <section
-          id="left"
-          className="flex items-center justify-between space-x-14"
-        >
-          <Link to="/">Logo</Link>
-          <ul className="flex items-center gap-4 list-none">
+    <header className="w-full border-b px-8 py-4">
+      <nav className="grid grid-cols-3 items-center">
+        <section id="left" className="flex items-center">
+          <Link to="/" className="uppercase tracking-wider font-barlow">
+            <img src={Logo} className="w-20" />
+          </Link>
+        </section>
+
+        <section id="mid" className="flex justify-center">
+          <ul className="flex list-none items-center gap-4">
             <li>
               <Link to="/">Home</Link>
             </li>
@@ -34,24 +37,22 @@ const Navbar = () => {
           </ul>
         </section>
 
-        <section id="right" className="flex items-center gap-4">
-          <span className="flex items-center gap-4">
-            <Link to="/wishlist">
-              <Heart size={24} />
-            </Link>
-            <Link to="/cart">
-              <ShoppingCart size={24} />
-            </Link>
-          </span>
+        <section id="right" className="flex items-center justify-end gap-4">
+          <Link to="/wishlist" className="flex items-center">
+            <Heart size={24} />
+          </Link>
+          <Link to="/cart" className="flex items-center">
+            <ShoppingCart size={24} />
+          </Link>
 
           {isLoggedIn ? (
             <Button
               variant="outline"
-              size="lg"
-              className="rounded-full p-4 transition-all duration-150"
+              size="icon-lg"
+              className="transition-all duration-150"
               onClick={handleLogin}
             >
-              <User size={28} />
+              <User size={20} />
             </Button>
           ) : (
             <Button
