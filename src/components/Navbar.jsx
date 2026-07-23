@@ -12,7 +12,7 @@ const Navbar = () => {
   };
 
   return (
-    <header className="w-full border-b px-12 py-4">
+    <header className="sticky w-full border-b px-12 py-4">
       <nav className="grid grid-cols-3 items-center">
         <section id="left" className="flex items-center">
           <Link to="/" className="uppercase tracking-wider font-barlow">
@@ -58,7 +58,7 @@ const Navbar = () => {
             <Button
               variant="default"
               size="lg"
-              className="transition-all duration-150"
+              className="transition-all duration-150 font-barlow tracking-wide"
               onClick={handleLogin}
             >
               Login
