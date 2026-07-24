@@ -9,7 +9,7 @@ const Hero = () => {
   };
 
   return (
-    <section className="h-4/5 p-12">
+    <section className="h-[80vh] p-12 border">
       <section className="h-full w-full bg-primary rounded-xl overflow-hidden p-12 flex items-center justify-between">
         <article id="left" className="space-y-1.5 w-2/3 ">
           <h1>
@@ -26,8 +26,8 @@ const Hero = () => {
             <BlurText
               text="AI-Powered Tech Marketplace"
               delay={10}
-              animateBy="letters"
-              direction="top"
+              animateBy="words"
+              direction="bottom"
               onAnimationComplete={handleAnimationComplete}
               className="capitalize text-5xl text-secondary tracking-wide font-sora"
             />
