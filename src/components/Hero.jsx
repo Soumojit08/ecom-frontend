@@ -9,7 +9,7 @@ const Hero = () => {
   };
 
   return (
-    <section className="h-[80vh] p-12 border">
+    <section className="h-[80vh] p-12">
       <section className="h-full w-full bg-primary rounded-xl overflow-hidden p-12 flex items-center justify-between">
         <article id="left" className="space-y-1.5 w-2/3 ">
           <h1>
