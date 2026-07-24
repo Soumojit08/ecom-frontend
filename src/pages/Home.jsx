@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import playstation from "../assets/PlayStation 5 Digital-Photoroom.png";
 import BlurText from "@/components/ui/BlurText";
+import { Link } from "react-router-dom";
 
 const Home = () => {
   const handleAnimationComplete = () => {
@@ -44,14 +45,14 @@ const Home = () => {
               size="lg"
               className="px-12 py-6 text-xl shadow-2xl font-sora "
             >
-              Shop Now
+              <Link to="/shop">Shop Now</Link>
             </Button>
             <Button
               variant="outline"
               size="lg"
               className="px-12 py-6 text-xl shadow-2xl text-secondary bg-transparent font-sora"
             >
-              Build Your PC
+              <Link to="/pc-builder">Build Your PC</Link>
             </Button>
           </div>
         </article>
@@ -61,7 +62,7 @@ const Home = () => {
         >
           <img
             src={playstation}
-            className="w-4/5 drop-shadow-2xl
+            className="w-3/4 drop-shadow-2xl
              backdrop:backdrop-blur-2xl
              hue-rotate-90
              brightness-90
