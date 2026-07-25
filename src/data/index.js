@@ -1151,7 +1151,7 @@ export const products = [
 
   {
     id: "playstation-001",
-    name: "Sony PlayStation 5 Slim Digital Edition",
+    name: "Sony PlayStation 5",
     category: "playstation",
     brand: "Sony",
     price: 44999,

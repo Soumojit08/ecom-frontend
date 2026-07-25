@@ -5,6 +5,7 @@ import About from "./pages/About";
 import Shop from "./pages/Shop";
 import PCBuilder from "./pages/PCBuilder";
 import Contact from "./pages/Contact";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/pc-builder" element={<PCBuilder />} />
         <Route path="/contact" element={<Contact />} />
       </Routes>
+      <Toaster />
     </>
   );
 }

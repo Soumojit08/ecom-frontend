@@ -8,15 +8,34 @@ import {
   CardAction,
   CardDescription,
 } from "./ui/card";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
 const ProductCard = (props) => {
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [wishListed, setWishListed] = useState(false);
+
+  const handleWishList = () => {
+    if (isLoggedIn) {
+      toast.success("WishList");
+      if (!wishListed) {
+        setWishListed(wishListed);
+      } else {
+        setWishListed(!wishListed);
+      }
+    } else {
+      toast.error("Please Login To Use WishList");
+      return;
+    }
+  };
+
   return (
     <>
-      <Card className="w-full max-w-xs gap-3">
+      <Card className="w-full max-w-xs gap-3 mb-4">
         <CardHeader className="pb-0">
           <CardAction>
-            <Button variant="ghost" size="icon-lg">
-              <Heart size={24} />
+            <Button onClick={handleWishList} variant="ghost" size="icon-lg">
+              {<Heart size={24} />}
             </Button>
           </CardAction>
         </CardHeader>

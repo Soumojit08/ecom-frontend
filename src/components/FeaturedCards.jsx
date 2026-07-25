@@ -2,6 +2,7 @@ import ProductCard from "./ProductCard";
 import { Button } from "./ui/button";
 import { ArrowRight } from "lucide-react";
 import products from "@/data";
+import { Link } from "react-router-dom";
 
 const FeaturedCards = () => {
   const featuredProd = products.filter((product) => product.featured);
@@ -15,13 +16,13 @@ const FeaturedCards = () => {
           size="lg"
           className="transition-all duration-150 font-barlow tracking-wide"
         >
-          View More
+          <Link to="/shop">View More</Link>
           <span>
             <ArrowRight />
           </span>
         </Button>
       </div>
-      <div className="flex flex-wrap items-center justify-evenly space-y-4">
+      <div className="flex flex-wrap items-center justify-evenly">
         {featuredProd.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
