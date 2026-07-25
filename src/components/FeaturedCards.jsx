@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 import { ArrowRight } from "lucide-react";
 import products from "@/data";
 
-const Features = () => {
+const FeaturedCards = () => {
   const featuredProd = products.filter((product) => product.featured);
 
   return (
@@ -30,4 +30,4 @@ const Features = () => {
   );
 };
 
-export default Features;
+export default FeaturedCards;

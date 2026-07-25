@@ -16,7 +16,7 @@ export const products = [
     brand: "AMD",
     price: 13999,
     image: cpu,
-    featured: true,
+    featured: false,
   },
   {
     id: "cpu-002",
