@@ -1,37 +1,10 @@
 import ProductCard from "./ProductCard";
 import { Button } from "./ui/button";
 import { ArrowRight } from "lucide-react";
-import motherboard from "../assets/motherboard.png";
-import playstation from "../assets/PlayStation 5 Digital-Photoroom.png";
-import mouse from "../assets/mouse.png";
+import products from "@/data";
 
 const Features = () => {
-  const Products = [
-    {
-      name: "ASUS Motherboard",
-      category: "Motherboard",
-      price: 10000,
-      brand: "ASUS",
-      description: "4 RAM slot motherboard",
-      image: motherboard,
-    },
-    {
-      name: "ASUS Mouse",
-      category: "Mouse",
-      price: 3000,
-      brand: "ASUS",
-      description: "RBG mouse",
-      image: mouse,
-    },
-    {
-      name: "Play Station 5",
-      category: "playstation",
-      price: 50000,
-      brand: "SONY",
-      description: "White color PS5",
-      image: playstation,
-    },
-  ];
+  const featuredProd = products.filter((product) => product.featured);
 
   return (
     <section className="px-12">
@@ -48,10 +21,10 @@ const Features = () => {
           </span>
         </Button>
       </div>
-      <div className="flex flex-wrap items-center justify-evenly">
-        <ProductCard product={Products[0]} />
-        <ProductCard product={Products[1]} />
-        <ProductCard product={Products[2]} />
+      <div className="flex flex-wrap items-center justify-evenly space-y-4">
+        {featuredProd.map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))}
       </div>
     </section>
   );

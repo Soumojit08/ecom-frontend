@@ -29,7 +29,9 @@ const ProductCard = (props) => {
             />
             <div className="flex items-center justify-between gap-2">
               <span>
-                <h2 className="text-xl font-barlow">{props.product.name}</h2>
+                <h2 className="text-base font-barlow line-clamp-1">
+                  {props.product.name}
+                </h2>
                 <CardDescription>{props.product.description}</CardDescription>
               </span>
               <h3 className="text-base font-semibold font-sora">
