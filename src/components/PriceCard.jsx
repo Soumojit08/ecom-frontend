@@ -28,7 +28,7 @@ const PriceCard = (props) => {
         </CardHeader>
         <CardContent>
           <h1 className="text-3xl font-bold text-muted-foreground">₹{price}</h1>
-          <Button variant="default" className="my-4">
+          <Button variant="default" size="lg" className="my-4">
             Enroll Now
           </Button>
           <h3 className="text-lg font-medium">Plan Benefits</h3>

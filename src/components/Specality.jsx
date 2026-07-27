@@ -8,8 +8,8 @@ const Specality = () => {
       <span className="flex items-center justify-center gap-2">
         <h1 className="text-2xl font-barlow font-medium">Join</h1>
         <RotatingText
-          texts={["SNOPLUX", "Community"]}
-          mainClassName="px-8 py-1 bg-primary text-secondary text-center overflow-hidden justify-center rounded-md text-2xl font-barlow font-medium"
+          texts={["Snoplux", "Community"]}
+          mainClassName="px-8 py-1.5 bg-primary text-secondary text-center overflow-hidden justify-center rounded-md text-2xl font-sora font-medium"
           initial={{ y: "100%" }}
           animate={{ y: 0 }}
           exit={{ y: "-100%" }}
