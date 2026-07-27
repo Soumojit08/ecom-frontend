@@ -3,6 +3,7 @@ import FeaturedCards from "@/components/FeaturedCards";
 import Hero from "@/components/Hero";
 import Specality from "@/components/Specality";
 import SellerRegister from "@/components/SellerRegister";
+import Footer from "@/components/Footer";
 
 const Home = () => {
   return (
@@ -12,6 +13,7 @@ const Home = () => {
       <Categories />
       <Specality />
       <SellerRegister />
+      <Footer />
     </div>
   );
 };
