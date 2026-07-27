@@ -44,7 +44,7 @@ const ProductCard = (props) => {
             <img
               src={props.product.image}
               alt=""
-              className="h-48 w-full object-contain"
+              className="h-48 w-full object-contain drop-shadow-2xl"
             />
             <div className="flex items-center justify-between gap-2">
               <span>

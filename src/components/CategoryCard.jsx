@@ -35,7 +35,11 @@ const CategoryCard = (props) => {
             </span>
           </Button>
           <div className="flex items-center justify-center w-full flex-col gap-4">
-            <img src={image} alt="" className="h-48 w-full object-contain" />
+            <img
+              src={image}
+              alt=""
+              className="h-48 w-full object-contain drop-shadow-2xl"
+            />
           </div>
         </CardContent>
       </Card>
