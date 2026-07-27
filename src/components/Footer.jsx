@@ -19,6 +19,9 @@ const Footer = () => {
               accessories, SNOPEX is your one-stop destination for everything
               computing.
             </p>
+            <h6 className="text-sm mt-4 font-bold font-sora">
+              Developed By : Soumojit Banerjee
+            </h6>
           </div>
 
           {/* Quick Links */}
