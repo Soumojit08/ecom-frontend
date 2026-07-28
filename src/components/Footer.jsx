@@ -5,13 +5,13 @@ import { FaFacebook, FaInstagram, FaGithub } from "react-icons/fa";
 
 const Footer = () => {
   return (
-    <footer className="bg-primary/95 text-secondary">
+    <footer className="bg-muted  border-t">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* About Section */}
           <div>
             <Link to="/">
-              <img src={Logo} alt="SNOPEX" className="invert w-20 mb-4" />
+              <img src={Logo} alt="SNOPEX" className="w-20 mb-4" />
             </Link>
             <p className="text-sm text-justify">
               From processors and graphics cards to gaming chairs, monitors,
@@ -26,9 +26,7 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-lg font-semibold text-white mb-4">
-              Quick Links
-            </h4>
+            <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2 text-base">
               <li>
                 <Link
@@ -68,9 +66,7 @@ const Footer = () => {
 
           {/* Contact Info */}
           <div>
-            <h4 className="text-lg font-semibold text-white mb-4">
-              Contact Us
-            </h4>
+            <h4 className="text-lg font-semibold mb-4">Contact Us</h4>
             <ul className="space-y-2">
               <li className="flex items-center">
                 <Phone size={24} className=" mr-2" />
@@ -89,9 +85,7 @@ const Footer = () => {
 
           {/* Social Links */}
           <div>
-            <h4 className="text-lg font-medium text-secondary mb-3">
-              Follow Us
-            </h4>
+            <h4 className="text-lg font-semibold mb-3">Follow Us</h4>
             <div className="flex space-x-4">
               <Link to="#">
                 <FaFacebook size={24} />
