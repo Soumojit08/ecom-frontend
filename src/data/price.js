@@ -6,8 +6,8 @@ const prices = [
     duration: "Monthly",
     features: [
       "Early Access to New Products",
-      "Exclusive Discounts on Select Items",
-      "Access to Members-Only Content",
+      "Free Shipping on All Orders",
+      "Limited Access of Custom PC Builder",
     ],
     badge: null,
   },
@@ -19,7 +19,7 @@ const prices = [
     features: [
       "All Basic Features",
       "Priority Customer Support",
-      "Free Shipping on All Orders",
+      "Upto 10 Custom PC Build",
     ],
     badge: "Recommended",
   },
