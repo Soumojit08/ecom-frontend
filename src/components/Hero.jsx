@@ -61,7 +61,7 @@ const Hero = () => {
           <div className="mt-4">
             <ul className="flex items-center space-x-6 capitalize text-secondary">
               {listItems.map((list) => (
-                <li className="flex items-center gap-1">
+                <li key={list} className="flex items-center gap-1">
                   <Check size={16} />
                   <span>{list}</span>
                 </li>
