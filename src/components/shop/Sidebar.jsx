@@ -10,10 +10,10 @@ import { Slider } from "../ui/slider";
 import { useState } from "react";
 
 const Sidebar = () => {
-  const [value, setValue] = useState([0, 1000]);
+  const [value, setValue] = useState([0, 100000]);
 
   return (
-    <Card className="flex flex-col gap-4 h-full w-1/6 py-6 px-2 rounded-sm">
+    <Card className="flex flex-col gap-4 h-full py-6 px-2 rounded-xs">
       <div id="header" className="text-base">
         Search - <span className="text-muted-foreground">465465</span>
       </div>
@@ -24,7 +24,7 @@ const Sidebar = () => {
 
         <div id="filter-1" className="capitalize">
           <h2 className="uppercase mb-2">Gender</h2>
-          <RadioGroup defaultValue="Male" className="w-fit px-4">
+          <RadioGroup defaultValue="Male" className="px-4">
             <div className="flex items-center gap-3">
               <RadioGroupItem value="default" id="r1" />
               <Label htmlFor="r1">Male</Label>
@@ -71,6 +71,8 @@ const Sidebar = () => {
           </div>
         </div>
 
+        <Separator />
+
         <div id="filter-3" className="flex flex-col gap-3">
           <h2 className="uppercase mb-2">Price </h2>
           <div className="flex flex-col gap-2 px-4">
@@ -85,8 +87,8 @@ const Sidebar = () => {
               value={value}
               onValueChange={(value) => setValue(value)}
               min={0}
-              max={1000}
-              step={100}
+              max={100000}
+              step={1000}
             />
             <div className="flex items-center w-full justify-between">
               <span className="text-sm text-muted-foreground">{value[0]}</span>
@@ -95,7 +97,6 @@ const Sidebar = () => {
           </div>
         </div>
       </div>
-      <div id="footer"></div>
     </Card>
   );
 };
