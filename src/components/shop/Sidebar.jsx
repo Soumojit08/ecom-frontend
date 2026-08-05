@@ -6,8 +6,12 @@ import { Separator } from "../ui/separator";
 import { Checkbox } from "../ui/checkbox";
 import { Card } from "../ui/card";
 import brands from "../../data/brands";
+import { Slider } from "../ui/slider";
+import { useState } from "react";
 
 const Sidebar = () => {
+  const [value, setValue] = useState([0, 1000]);
+
   return (
     <Card className="flex flex-col gap-4 h-full w-1/6 py-6 px-2 rounded-sm">
       <div id="header" className="text-base">
@@ -40,9 +44,7 @@ const Sidebar = () => {
 
         <div id="filter-2" className="flex flex-col gap-3">
           <span className="flex items-center justify-between">
-            <h2 className="uppercase text-sm font-medium tracking-wide">
-              Brand
-            </h2>
+            <h2 className="uppercase mb-2">Brand</h2>
             <Button variant="outline" size="icon-sm">
               <Search className="size-4" />
             </Button>
@@ -66,6 +68,30 @@ const Sidebar = () => {
                   </div>
                 ),
             )}
+          </div>
+        </div>
+
+        <div id="filter-3" className="flex flex-col gap-3">
+          <h2 className="uppercase mb-2">Price </h2>
+          <div className="flex flex-col gap-2 px-4">
+            <div className="flex items-center w-full justify-between ">
+              <span className="text-sm text-muted-foreground">Min</span>
+              <span className="text-sm text-muted-foreground float-right">
+                Max
+              </span>
+            </div>
+            <Slider
+              id="price-range"
+              value={value}
+              onValueChange={(value) => setValue(value)}
+              min={0}
+              max={1000}
+              step={100}
+            />
+            <div className="flex items-center w-full justify-between">
+              <span className="text-sm text-muted-foreground">{value[0]}</span>
+              <span className="text-sm text-muted-foreground">{value[1]}</span>
+            </div>
           </div>
         </div>
       </div>
