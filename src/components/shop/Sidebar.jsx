@@ -1,19 +1,19 @@
 import { Search } from "lucide-react";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
-import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Separator } from "../ui/separator";
 import { Checkbox } from "../ui/checkbox";
 import { Card } from "../ui/card";
 import brands from "../../data/brands";
 import { Slider } from "../ui/slider";
 import { useState } from "react";
+import categories from "@/data/categories";
 
 const Sidebar = () => {
   const [value, setValue] = useState([0, 100000]);
 
   return (
-    <Card className="flex flex-col gap-4 h-full py-6 px-2 rounded-xs">
+    <Card className="flex flex-col gap-2 h-full py-4 px-2 rounded-xs">
       <div id="header" className="text-base">
         Search - <span className="text-muted-foreground">465465</span>
       </div>
@@ -23,21 +23,24 @@ const Sidebar = () => {
         <Separator />
 
         <div id="filter-1" className="capitalize">
-          <h2 className="uppercase mb-2">Gender</h2>
-          <RadioGroup defaultValue="Male" className="px-4">
-            <div className="flex items-center gap-3">
-              <RadioGroupItem value="default" id="r1" />
-              <Label htmlFor="r1">Male</Label>
-            </div>
-            <div className="flex items-center gap-3">
-              <RadioGroupItem value="comfortable" id="r2" />
-              <Label htmlFor="r2">Female</Label>
-            </div>
-            <div className="flex items-center gap-3">
-              <RadioGroupItem value="compact" id="r3" />
-              <Label htmlFor="r3">Others</Label>
-            </div>
-          </RadioGroup>
+          <h2 className="uppercase mb-2">category</h2>
+
+          <div className="flex flex-col gap-2 px-4">
+            {categories.map((category, i) => (
+              <div key={category.id} className="flex items-center gap-2">
+                <Checkbox
+                  id={`category-checkbox-${i}`}
+                  name={`category-checkbox-${i}`}
+                />
+                <Label
+                  htmlFor={`category-checkbox-${i}`}
+                  className="cursor-pointer font-normal"
+                >
+                  {category.name}
+                </Label>
+              </div>
+            ))}
+          </div>
         </div>
 
         <Separator />
@@ -53,7 +56,7 @@ const Sidebar = () => {
           <div className="flex flex-col gap-2 px-4">
             {brands.map(
               (brand, i) =>
-                i < 5 && (
+                i < 4 && (
                   <div key={brand.id} className="flex items-center gap-2">
                     <Checkbox
                       id={`brand-checkbox-${i}`}
@@ -68,6 +71,9 @@ const Sidebar = () => {
                   </div>
                 ),
             )}
+            <Button variant="link" size="link-sm">
+              show more
+            </Button>
           </div>
         </div>
 

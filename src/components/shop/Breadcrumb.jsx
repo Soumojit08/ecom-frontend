@@ -20,7 +20,7 @@ export function BreadcrumbUse() {
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
-          <BreadcrumbLink render={<Link to="/category">Category</Link>} />
+          <BreadcrumbLink render={<Link to="/shop/category">Category</Link>} />
         </BreadcrumbItem>
       </BreadcrumbList>
     </Breadcrumb>
