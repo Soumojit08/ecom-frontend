@@ -13,7 +13,7 @@ const Sidebar = () => {
   const [value, setValue] = useState([0, 100000]);
 
   return (
-    <Card className="flex flex-col gap-2 h-full py-4 px-2 rounded-xs">
+    <Card className="flex flex-col gap-2 h-full p-2 rounded-sm">
       <div id="header" className="text-base">
         Search - <span className="text-muted-foreground">465465</span>
       </div>
@@ -56,7 +56,7 @@ const Sidebar = () => {
           <div className="flex flex-col gap-2 px-4">
             {brands.map(
               (brand, i) =>
-                i < 4 && (
+                i < 5 && (
                   <div key={brand.id} className="flex items-center gap-2">
                     <Checkbox
                       id={`brand-checkbox-${i}`}
@@ -99,6 +99,40 @@ const Sidebar = () => {
             <div className="flex items-center w-full justify-between">
               <span className="text-sm text-muted-foreground">{value[0]}</span>
               <span className="text-sm text-muted-foreground">{value[1]}</span>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <div id="filter-4" className="flex flex-col gap-3">
+          <h2 className="uppercase mb-2">Availability</h2>
+
+          <div className="flex flex-col gap-2 px-4">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id={`availability-checkbox-1`}
+                name={`availability-checkbox-1`}
+              />
+              <Label
+                htmlFor={`availability-checkbox-1`}
+                className="cursor-pointer font-normal"
+              >
+                In Stock
+              </Label>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id={`availability-checkbox-2`}
+                name={`availability-checkbox-2`}
+              />
+              <Label
+                htmlFor={`availability-checkbox-2`}
+                className="cursor-pointer font-normal"
+              >
+                All Products
+              </Label>
             </div>
           </div>
         </div>

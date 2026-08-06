@@ -14,6 +14,7 @@ import toast from "react-hot-toast";
 const ProductCard = (props) => {
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [wishListed, setWishListed] = useState(false);
+  const { className } = props;
 
   const handleWishList = () => {
     if (isLoggedIn) {
@@ -31,7 +32,7 @@ const ProductCard = (props) => {
 
   return (
     <>
-      <Card className="w-full max-w-xs gap-3 mb-4">
+      <Card className={`w-full max-w-xs gap-3 mb-4 ${className}`}>
         <CardHeader className="pb-0">
           <CardAction>
             <Button onClick={handleWishList} variant="ghost" size="icon-lg">
