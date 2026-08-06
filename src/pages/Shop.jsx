@@ -5,12 +5,12 @@ import Sorting from "@/components/shop/Sorting";
 
 const Shop = () => {
   return (
-    <div className="p-4 flex justify-between gap-4">
-      <div className="w-1/2 max-h-screen inline-block space-y-3">
+    <div className="flex justify-between gap-4">
+      <div className="h-full p-4 w-1/2 space-y-3 border border-t-0">
         <BreadcrumbUse />
         <Sidebar />
       </div>
-      <div className="space-y-3 ">
+      <div className="space-y-3 p-4 ">
         <Sorting />
         <Products />
       </div>

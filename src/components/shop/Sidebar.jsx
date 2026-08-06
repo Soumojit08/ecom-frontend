@@ -3,7 +3,6 @@ import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Separator } from "../ui/separator";
 import { Checkbox } from "../ui/checkbox";
-import { Card } from "../ui/card";
 import brands from "../../data/brands";
 import { Slider } from "../ui/slider";
 import { useState } from "react";
@@ -13,13 +12,10 @@ const Sidebar = () => {
   const [value, setValue] = useState([0, 100000]);
 
   return (
-    <Card className="flex flex-col gap-2 h-full p-2 rounded-sm">
-      <div id="header" className="text-base">
-        Search - <span className="text-muted-foreground">465465</span>
-      </div>
-      <div id="content" className="flex flex-col gap-4">
-        <h1 className="text-lg font-barlow font-medium">Filters</h1>
+    <div className="flex flex-col gap-2 h-full p-2 rounded-sm ">
+      <h1 className="text-lg ">Filters</h1>
 
+      <div id="content" className="flex flex-col gap-4">
         <Separator />
 
         <div id="filter-1" className="capitalize">
@@ -137,7 +133,7 @@ const Sidebar = () => {
           </div>
         </div>
       </div>
-    </Card>
+    </div>
   );
 };
 
