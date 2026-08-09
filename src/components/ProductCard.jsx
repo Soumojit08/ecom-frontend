@@ -26,6 +26,7 @@ const ProductCard = (props) => {
       }
     } else {
       toast.error("Please Login To Use WishList");
+      setIsLoggedIn(isLoggedIn);
       return;
     }
   };
@@ -41,15 +42,15 @@ const ProductCard = (props) => {
           </CardAction>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="flex w-full flex-col gap-4">
+          <div className="flex w-full flex-col gap-4 overflow-hidden">
             <img
-              src={props.product.image}
-              alt=""
-              className="h-48 w-full object-contain drop-shadow-2xl"
+              src={props.product.image_url}
+              alt={props.product.name}
+              className="h-48 w-full object-contain opacity-90"
             />
             <div className="flex items-center justify-between gap-2">
               <span>
-                <h2 className="text-base font-barlow line-clamp-1">
+                <h2 className="text-base font-barlow line-clamp-1 capitalize">
                   {props.product.name}
                 </h2>
                 <CardDescription>{props.product.description}</CardDescription>
