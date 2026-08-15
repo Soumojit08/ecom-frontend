@@ -2,6 +2,7 @@ import { Heart, ShoppingCart, User } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "../ui/button";
+import { Show, SignInButton } from "@clerk/react";
 
 const Actions = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -25,7 +26,7 @@ const Actions = () => {
         <ShoppingCart size={22} />
       </Link>
 
-      {isLoggedIn ? (
+      {/* {isLoggedIn ? (
         <Button
           variant="outline"
           size="icon-lg"
@@ -35,15 +36,30 @@ const Actions = () => {
           <User size={20} />
         </Button>
       ) : (
+        
+      )} */}
+      <Show when="signed-in">
         <Button
-          variant="default"
-          size="lg"
-          className="px-6 font-barlow tracking-wide transition-all duration-150"
+          variant="outline"
+          size="icon-lg"
+          className="rounded-full transition-all duration-150"
           onClick={handleLogin}
         >
-          Login
+          <User size={20} />
         </Button>
-      )}
+      </Show>
+      <Show when="signed-out">
+        <SignInButton>
+          <Button
+            variant="default"
+            size="lg"
+            className="px-6 font-barlow tracking-wide transition-all duration-150"
+            onClick={handleLogin}
+          >
+            Login
+          </Button>
+        </SignInButton>
+      </Show>
     </div>
   );
 };
