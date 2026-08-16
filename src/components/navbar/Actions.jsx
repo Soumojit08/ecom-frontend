@@ -1,18 +1,11 @@
-import { Heart, ShoppingCart, User } from "lucide-react";
-import { useState } from "react";
+import { Heart, ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "../ui/button";
-import { Show, SignInButton } from "@clerk/react";
+import { Show, SignInButton, UserButton } from "@clerk/react";
 
 const Actions = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  const handleLogin = () => {
-    setIsLoggedIn(!isLoggedIn);
-  };
-
   return (
-    <div className="flex shrink-0 items-center gap-5">
+    <div className="flex shrink-0 items-center gap-4">
       <Link
         to="/wishlist"
         className="flex items-center text-foreground/70 transition-colors hover:text-foreground"
@@ -26,37 +19,25 @@ const Actions = () => {
         <ShoppingCart size={22} />
       </Link>
 
-      {/* {isLoggedIn ? (
-        <Button
-          variant="outline"
-          size="icon-lg"
-          className="rounded-full transition-all duration-150"
-          onClick={handleLogin}
-        >
-          <User size={20} />
-        </Button>
-      ) : (
-        
-      )} */}
       <Show when="signed-in">
-        <Button
-          variant="outline"
-          size="icon-lg"
-          className="rounded-full transition-all duration-150"
-          onClick={handleLogin}
-        >
-          <User size={20} />
-        </Button>
+        <UserButton
+          afterSignOutUrl="/"
+          appearance={{
+            elements: {
+              avatarBox: "w-10 h-10 rounded-full",
+            },
+          }}
+        />
       </Show>
+
       <Show when="signed-out">
-        <SignInButton>
+        <SignInButton mode="modal" forceRedirectUrl="/">
           <Button
             variant="default"
             size="lg"
             className="px-6 font-barlow tracking-wide transition-all duration-150"
-            onClick={handleLogin}
           >
-            Login
+            Sign In
           </Button>
         </SignInButton>
       </Show>
