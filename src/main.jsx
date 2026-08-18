@@ -3,19 +3,23 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
 import { ClerkProvider } from "@clerk/react";
- import { shadcn } from "@clerk/ui/themes";
-
+import { shadcn } from "@clerk/ui/themes";
  
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
+const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")).render(
-  <ClerkProvider
-    appearance={{
-      theme: shadcn,
-    }}
-  >
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </ClerkProvider>,
-);
+  <QueryClientProvider client={queryClient}>
+    <ClerkProvider
+      appearance={{
+        theme: shadcn,
+      }}
+    >
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </ClerkProvider>
+    ,
+  </QueryClientProvider>,
+);  
