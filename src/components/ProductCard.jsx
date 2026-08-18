@@ -51,7 +51,7 @@ const ProductCard = (props) => {
           <Button size="lg" onClick={handleBuyNow}>
             Buy now
           </Button>
-          <Link to={`/${props.product.category}/${props.product.name}`}>
+          <Link to={`/${props.product.category}/${props.product.id}`}>
             <Button variant="outline" size="lg">
               View Details
               <span>
