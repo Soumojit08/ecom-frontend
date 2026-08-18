@@ -1,56 +1,46 @@
-import { useEffect, useMemo, useState } from "react";
 import axiosInstance from "@/lib/axios";
-import toast from "react-hot-toast";
 import ProductCard from "../ProductCard";
 import { Spinner } from "../ui/spinner";
+import { useQuery } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
-const Products = ({ category, search }) => {
-  const [productsData, setProductsData] = useState([]);
+const fetchProducts = async () => {
+  const response = await axiosInstance.get("/api/get-product");
+  console.log(response.data.data);
+  return response.data.data;
+};
 
-  async function fetchProduct() {
-    try {
-      const response = await axiosInstance.get("/api/get-product");
-      const data = response.data?.data ?? [];
-      setProductsData(data);
-      toast.success("Products fetched successfully");
-      return data;
-    } catch (error) {
-      toast.error("Error in Fetching Products");
-      console.log("error : ", error);
-      return [];
-    }
+const Products = () => {
+  const {
+    data: products = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["products"],
+    queryFn: fetchProducts,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <Spinner />
+      </div>
+    );
   }
 
-  useEffect(() => {
-    fetchProduct();
-  }, []);
-
-  const filteredProducts = useMemo(() => {
-    return productsData.filter((product) => {
-      const matchesCategory = category
-        ? product.category?.toLowerCase() === category
-        : true;
-      const matchesSearch = search
-        ? [product.name, product.brand, product.category]
-            .filter(Boolean)
-            .some((value) => value.toLowerCase().includes(search))
-        : true;
-      return matchesCategory && matchesSearch;
-    });
-  }, [productsData, category, search]);
+  if (isError) {
+    return toast.error(error);
+  }
 
   return (
     <div className="h-full w-full flex flex-wrap gap-8 justify-center items-start font-sora">
-      {productsData.length === 0 ? (
-        <div className="w-full h-full flex items-center justify-center">
-          <Spinner />
-        </div>
-      ) : filteredProducts.length === 0 ? (
+      {products.length == 0 ? (
         <div className="w-full h-full flex items-center justify-center text-muted-foreground">
           No products match your search.
         </div>
       ) : (
-        filteredProducts.map((product) => (
+        products.map((product) => (
           <ProductCard
             key={product.id}
             product={product}
