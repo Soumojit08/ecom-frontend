@@ -1,5 +1,4 @@
 import { useState } from "react";
-import products from "@/data/index";
 import BreadcrumbUse from "./Breadcrumb";
 import { Button } from "../ui/button";
 import {
@@ -11,7 +10,6 @@ import {
   Truck,
   ShieldCheck,
   RotateCcw,
-  Check,
 } from "lucide-react";
 import { Input } from "../ui/input";
 import { Field, FieldGroup } from "../ui/field";
@@ -25,62 +23,71 @@ import {
   AccordionTrigger,
 } from "../ui/accordion";
 import { cn } from "@/lib/utils";
-
-// ---------------------------------------------------------------------------
-// DUMMY DATA — placeholders until the real product schema/API is wired up.
-// Shape mirrors what a real product record should eventually look like, so
-// swapping this out later is a drop-in replacement, not a rewrite.
-// ---------------------------------------------------------------------------
-const DUMMY_VARIANTS = [
-  { id: "v1", label: "8GB / 256GB", stock: 12 },
-  { id: "v2", label: "16GB / 512GB", stock: 6 },
-  { id: "v3", label: "32GB / 1TB", stock: 0 },
-];
-
-const DUMMY_HIGHLIGHTS = [
-  "LGA1700 socket, supports 12th/13th/14th Gen Intel Core CPUs",
-  "Dual channel DDR4 memory, up to 3200MHz",
-  "PCIe 4.0 M.2 slot with heatsink for high-speed storage",
-  "Realtek 1Gb LAN with LANGuard protection",
-];
-
-const DUMMY_SPECS = [
-  { label: "Brand", value: "ASUS" },
-  { label: "Chipset", value: "Intel H610" },
-  { label: "Socket", value: "LGA1700" },
-  { label: "Memory Slots", value: "2 x DIMM, Max 64GB" },
-  { label: "Form Factor", value: "Micro-ATX" },
-  { label: "Warranty", value: "3 Years Manufacturer Warranty" },
-];
-
-const DUMMY_DESCRIPTION =
-  "Built for reliability and everyday performance, this motherboard pairs a durable power design with practical connectivity. Whether you're assembling a budget workstation or a compact home office rig, it offers steady power delivery, straightforward BIOS controls, and the I/O you actually use.";
+import axiosInstance from "@/lib/axios";
+import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import { Spinner } from "../ui/spinner";
 
 const DELIVERY_PERKS = [
-  { icon: Truck, text: "Free delivery in 3–5 business days" },
-  { icon: RotateCcw, text: "7-day easy return policy" },
-  { icon: ShieldCheck, text: "3-year manufacturer warranty" },
+  { icon: Truck, text: "Free delivery on orders above ₹500" },
+  { icon: ShieldCheck, text: "1 year manufacturer warranty" },
+  { icon: RotateCcw, text: "Easy returns & exchanges" },
 ];
 
 const ProductDetails = () => {
-  const product = products.find((product) => product.id === "mb-001");
-
-  const [selectedVariant, setSelectedVariant] = useState(DUMMY_VARIANTS[0].id);
+  const { id } = useParams();
   const [quantity, setQuantity] = useState(1);
   const [pincode, setPincode] = useState("");
-  const [isWishlisted, setIsWishlisted] = useState(false);
 
-  if (!product) return null;
+  async function fetchProductById() {
+    const response = await axiosInstance.get(`/api/get-product/${id}`);
+    return response.data.data;
+  }
 
-  const discountPercent = 58;
-  const mrp = 14900;
+  const {
+    data: product,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["product", id],
+    queryFn: fetchProductById,
+  });
 
-  const relatedProducts = products
-    .filter((p) => p.id !== product.id)
-    .slice(0, 4);
+  const increaseQty = () => {
+    if (quantity < 10) setQuantity(quantity + 1);
+  };
 
-  const decreaseQty = () => setQuantity((q) => Math.max(1, q - 1));
-  const increaseQty = () => setQuantity((q) => Math.min(10, q + 1));
+  const decreaseQty = () => {
+    if (quantity > 1) setQuantity(quantity - 1);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return toast.error(error);
+  }
+
+  // Parse metadata_specs JSON
+  let specs = [];
+  if (product.metadata_specs) {
+    try {
+      const parsedSpecs = JSON.parse(product.metadata_specs);
+      specs = Object.entries(parsedSpecs).map(([label, value]) => ({
+        label,
+        value,
+      }));
+    } catch (e) {
+      console.error("Error parsing specs:", e);
+    }
+  }
 
   return (
     <section className="min-h-screen w-full pb-20">
@@ -95,13 +102,16 @@ const ProductDetails = () => {
         <div className="w-2/5 shrink-0 sticky top-6 flex flex-col items-center gap-5">
           <div className="w-full aspect-square rounded-3xl border border-border bg-card flex items-center justify-center p-10">
             <img
-              src={product.image}
+              src={product.image_url}
               alt={product.name}
-              className="w-full h-full object-contain drop-shadow-lg"
+              className="w-full h-full object-contain"
+              onError={(e) => {
+                e.target.src = "https://via.placeholder.com/500?text=No+Image";
+              }}
             />
           </div>
 
-          {/* Thumbnail strip — dummy, reuses main image until gallery data exists */}
+          {/* Thumbnail strip — reuses main image */}
           <div className="flex gap-3 w-full">
             {[0, 1, 2, 3].map((i) => (
               <button
@@ -114,24 +124,21 @@ const ProductDetails = () => {
                 )}
               >
                 <img
-                  src={product.image}
+                  src={product.image_url}
                   alt={`${product.name} view ${i + 1}`}
                   className="w-full h-full object-contain opacity-90"
+                  onError={(e) => {
+                    e.target.src =
+                      "https://via.placeholder.com/500?text=No+Image";
+                  }}
                 />
               </button>
             ))}
           </div>
 
           <div className="flex gap-2 w-full">
-            <Button
-              variant="outline"
-              className="flex-1 gap-2"
-              onClick={() => setIsWishlisted((v) => !v)}
-            >
-              <Heart
-                className={cn(isWishlisted && "fill-primary text-primary")}
-                size={18}
-              />
+            <Button variant="outline" className="flex-1 gap-2">
+              <Heart size={18} />
               Wishlist
             </Button>
             <Button variant="outline" className="flex-1 gap-2">
@@ -152,25 +159,27 @@ const ProductDetails = () => {
           </h1>
 
           <div className="flex items-center gap-3 mb-6">
-            <div className="bg-secondary px-2 py-1 rounded-md inline-flex items-center gap-1 text-sm">
-              <span className="font-medium">4.0</span>
-              <Star size={14} className="fill-green-700 text-green-700" />
-            </div>
-            <span className="text-sm text-muted-foreground">3,932 ratings</span>
-            <Separator orientation="vertical" className="h-4" />
-            <span className="text-sm text-primary hover:underline cursor-pointer">
-              See all reviews
-            </span>
+            {product.rating_count > 0 ? (
+              <>
+                <div className="bg-secondary px-2 py-1 rounded-md inline-flex items-center gap-1 text-sm">
+                  <span className="font-medium">
+                    {(product.rating_count / 1000).toFixed(1)}
+                  </span>
+                  <Star size={14} className="fill-green-700 text-green-700" />
+                </div>
+                <span className="text-sm text-muted-foreground">
+                  {product.rating_count.toLocaleString()} ratings
+                </span>
+              </>
+            ) : (
+              <span className="text-sm text-muted-foreground">
+                No ratings yet
+              </span>
+            )}
           </div>
 
           {/* Price */}
           <div id="price" className="flex items-end gap-2 mb-1">
-            <span className="text-3xl font-bold text-green-700">
-              {discountPercent}% off
-            </span>
-            <span className="text-2xl text-muted-foreground line-through">
-              ₹{mrp.toLocaleString("en-IN")}
-            </span>
             <span className="text-4xl font-bold text-secondary-foreground">
               ₹{Number(product.price).toLocaleString("en-IN")}
             </span>
@@ -180,36 +189,6 @@ const ProductDetails = () => {
           </p>
 
           <Separator className="mb-6" />
-
-          {/* Variant selector */}
-          <div className="mb-6">
-            <Label className="text-base font-semibold mb-3 block">
-              Configuration
-            </Label>
-            <div className="flex flex-wrap gap-2">
-              {DUMMY_VARIANTS.map((variant) => {
-                const isSelected = selectedVariant === variant.id;
-                const isOutOfStock = variant.stock === 0;
-                return (
-                  <button
-                    key={variant.id}
-                    disabled={isOutOfStock}
-                    onClick={() => setSelectedVariant(variant.id)}
-                    className={cn(
-                      "px-4 py-2 rounded-xl border-2 text-sm font-medium transition-colors relative",
-                      isSelected
-                        ? "border-primary bg-accent text-accent-foreground"
-                        : "border-border bg-card hover:border-primary/50",
-                      isOutOfStock &&
-                        "opacity-40 cursor-not-allowed line-through hover:border-border",
-                    )}
-                  >
-                    {variant.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
 
           {/* Quantity */}
           <div className="mb-6">
@@ -284,16 +263,22 @@ const ProductDetails = () => {
 
           <Separator className="mb-6" />
 
-          {/* Highlights */}
+          {/* Product Info */}
           <div className="mb-2">
-            <h2 className="text-xl font-semibold mb-3">Highlights</h2>
-            <ul className="flex flex-col gap-2">
-              {DUMMY_HIGHLIGHTS.map((point) => (
-                <li key={point} className="flex items-start gap-2.5 text-sm">
-                  <Check size={16} className="text-primary shrink-0 mt-0.5" />
-                  <span className="text-secondary-foreground">{point}</span>
-                </li>
-              ))}
+            <h2 className="text-xl font-semibold mb-3">Product Information</h2>
+            <ul className="flex flex-col gap-3">
+              <li className="flex justify-between border-b border-border pb-2">
+                <span className="text-muted-foreground">Brand</span>
+                <span className="font-medium text-secondary-foreground capitalize">
+                  {product.brand}
+                </span>
+              </li>
+              <li className="flex justify-between border-b border-border pb-2">
+                <span className="text-muted-foreground">Category</span>
+                <span className="font-medium text-secondary-foreground capitalize">
+                  {product.category?.replace(/-/g, " ")}
+                </span>
+              </li>
             </ul>
           </div>
         </div>
@@ -301,80 +286,37 @@ const ProductDetails = () => {
 
       {/* ---------------- Description / Specs Accordion ---------------- */}
       <section className="px-16 max-w-7xl mx-auto mt-14">
-        <Accordion
-          type="multiple"
-          defaultValue={["description", "specs"]}
-          className="w-full "
-        >
-          <AccordionItem value="description">
-            <AccordionTrigger className="text-xl font-semibold">
-              Description
-            </AccordionTrigger>
-            <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-              {DUMMY_DESCRIPTION}
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="specs">
-            <AccordionTrigger className="text-xl font-semibold">
-              Specifications
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="grid grid-cols-2 gap-x-8 gap-y-3">
-                {DUMMY_SPECS.map((spec) => (
-                  <div
-                    key={spec.label}
-                    className="flex justify-between border-b border-border py-2 text-sm"
-                  >
-                    <span className="text-muted-foreground">{spec.label}</span>
-                    <span className="font-medium text-secondary-foreground">
-                      {spec.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="reviews">
-            <AccordionTrigger className="text-xl font-semibold">
-              Ratings &amp; Reviews
-            </AccordionTrigger>
-            <AccordionContent className="text-muted-foreground text-sm">
-              Reviews will be wired up once the reviews API/schema is ready.
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </section>
-
-      {/* ---------------- Related products ---------------- */}
-      {relatedProducts.length > 0 && (
-        <section className="px-16 max-w-7xl mx-auto mt-16">
-          <h2 className="text-2xl font-sora uppercase mb-6">
-            You May Also Like
-          </h2>
-          <div className="grid grid-cols-4 gap-5">
-            {relatedProducts.map((item) => (
-              <div
-                key={item.id}
-                className="border border-border rounded-2xl p-4 bg-card flex flex-col hover:shadow-md transition-shadow cursor-pointer"
-              >
-                <div className="aspect-square flex items-center justify-center mb-3">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-4/5 h-4/5 object-contain"
-                  />
+        {specs.length > 0 && (
+          <Accordion
+            type="multiple"
+            defaultValue={["specs"]}
+            className="w-full"
+          >
+            <AccordionItem value="specs">
+              <AccordionTrigger className="text-xl font-semibold">
+                Specifications
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="grid grid-cols-2 gap-x-8 gap-y-3">
+                  {specs.map((spec) => (
+                    <div
+                      key={spec.label}
+                      className="flex justify-between border-b border-border py-2 text-sm"
+                    >
+                      <span className="text-muted-foreground">
+                        {spec.label}
+                      </span>
+                      <span className="font-medium text-secondary-foreground">
+                        {spec.value}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-                <p className="text-sm font-medium truncate">{item.name}</p>
-                <p className="text-lg font-bold mt-1">
-                  ₹{Number(item.price).toLocaleString("en-IN")}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        )}
+      </section>
     </section>
   );
 };
