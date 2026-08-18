@@ -8,27 +8,13 @@ import {
   CardAction,
   CardDescription,
 } from "./ui/card";
-import { useState } from "react";
-import toast from "react-hot-toast";
+import { Link } from "react-router-dom";
 
 const ProductCard = (props) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const [wishListed, setWishListed] = useState(false);
   const { className } = props;
 
-  const handleWishList = () => {
-    if (isLoggedIn) {
-      toast.success("WishList");
-      if (!wishListed) {
-        setWishListed(wishListed);
-      } else {
-        setWishListed(!wishListed);
-      }
-    } else {
-      toast.error("Please Login To Use WishList");
-      setIsLoggedIn(isLoggedIn);
-      return;
-    }
+  const handleBuyNow = async () => {
+    console.log("Todo Add to Cart item");
   };
 
   return (
@@ -36,7 +22,7 @@ const ProductCard = (props) => {
       <Card className={`w-full max-w-xs gap-3 mb-4 ${className}`}>
         <CardHeader className="pb-0">
           <CardAction>
-            <Button onClick={handleWishList} variant="ghost" size="icon-lg">
+            <Button variant="ghost" size="icon-lg">
               {<Heart size={24} />}
             </Button>
           </CardAction>
@@ -62,13 +48,17 @@ const ProductCard = (props) => {
           </div>
         </CardContent>
         <CardFooter className="pt-2 flex items-center ">
-          <Button size="lg">Shop now</Button>
-          <Button variant="outline" size="lg">
-            View Details
-            <span>
-              <ArrowRight size={24} />
-            </span>
+          <Button size="lg" onClick={handleBuyNow}>
+            Buy now
           </Button>
+          <Link to={`/${props.product.category}/${props.product.name}`}>
+            <Button variant="outline" size="lg">
+              View Details
+              <span>
+                <ArrowRight size={24} />
+              </span>
+            </Button>
+          </Link>
         </CardFooter>
       </Card>
     </>
