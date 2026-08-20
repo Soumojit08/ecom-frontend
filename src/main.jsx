@@ -4,6 +4,7 @@ import "./index.css";
 import App from "./App.jsx";
 import { ClerkProvider } from "@clerk/react";
 import { shadcn } from "@clerk/ui/themes";
+import AxiosProvider from "./providers/AxiosProvider";
  
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -16,9 +17,11 @@ createRoot(document.getElementById("root")).render(
         theme: shadcn,
       }}
     >
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <AxiosProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </AxiosProvider>
     </ClerkProvider>
     ,
   </QueryClientProvider>,

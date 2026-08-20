@@ -75,7 +75,7 @@ const ProductDetails = () => {
     return toast.error(error);
   }
 
-  // Parse metadata_specs JSON
+  // need to fix it
   let specs = [];
   if (product.metadata_specs) {
     try {
