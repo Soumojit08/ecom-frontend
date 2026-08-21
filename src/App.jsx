@@ -5,9 +5,13 @@ import About from "./pages/About";
 import Shop from "./pages/Shop";
 import PCBuilder from "./pages/PCBuilder";
 import Contact from "./pages/Contact";
-import Toaster from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import ProductDetails from "./components/shop/ProductDetails";
 import AddProduct from "./components/shop/AddProduct";
+import ProtectedRoute from "./auth/ProtectedRoutes";
+import Cart from "./pages/Cart";
+import Wishlist from "./pages/Wishlist";
+import Orders from "./pages/Orders";
 
 function App() {
   return (
@@ -21,7 +25,12 @@ function App() {
         <Route path="/shop/:category/:id" element={<ProductDetails />} />
         <Route path="/pc-builder" element={<PCBuilder />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/add-product" element={<AddProduct />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/add-product" element={<AddProduct />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/orders" element={<Orders />} />
+        </Route>
       </Routes>
       <Toaster />
     </>

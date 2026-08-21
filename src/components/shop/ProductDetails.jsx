@@ -162,7 +162,7 @@ const ProductDetails = () => {
                   <Star size={14} className="fill-green-700 text-green-700" />
                 </div>
                 <span className="text-sm text-muted-foreground">
-                  {product.rating_count.toLocaleString()} ratings
+                  {Number(product.rating_count).toString()} ratings
                 </span>
               </>
             ) : (
@@ -175,7 +175,7 @@ const ProductDetails = () => {
           {/* Price */}
           <div id="price" className="flex items-end gap-2 mb-1">
             <span className="text-4xl font-bold text-secondary-foreground">
-              ₹{Number(product.price).toLocaleString("en-IN")}
+              ₹{Number(product.price).toString()}
             </span>
           </div>
           <p className="text-sm text-muted-foreground mb-6">

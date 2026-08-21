@@ -15,7 +15,7 @@ const AddProduct = () => {
 
   const addProduct = async (formData) => {
     const res = await axiosInstance.post("/api/add-product", formData);
-    return res.status;
+    return res.data;
   };
 
   const mutation = useMutation({
@@ -27,10 +27,24 @@ const AddProduct = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    const trimmedName = name.trim();
+    const trimmedCategory = category.trim();
+    const parsedPrice = Number(price);
+
+    if (
+      !trimmedName ||
+      !trimmedCategory ||
+      !Number.isFinite(parsedPrice) ||
+      parsedPrice <= 0
+    ) {
+      toast.error("Enter a product name, category, and a valid price");
+      return;
+    }
+
     const data = {
-      brand,
-      name,
-      category,
+      brand: brand.trim(),
+      name: trimmedName,
+      category: trimmedCategory,
       price,
     };
 
@@ -71,9 +85,11 @@ const AddProduct = () => {
           <Field>
             <Label>Price</Label>
             <Input
+              type="number"
+              required
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              placeholder="eg. 11XX..."
+              placeholder="eg. 11999"
             />
           </Field>
         </FieldGroup>
