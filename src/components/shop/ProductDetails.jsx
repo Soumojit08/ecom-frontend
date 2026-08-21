@@ -26,7 +26,6 @@ import { cn } from "@/lib/utils";
 import axiosInstance from "@/lib/axios";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import toast from "react-hot-toast";
 import { Spinner } from "../ui/spinner";
 
 const DELIVERY_PERKS = [
@@ -72,21 +71,16 @@ const ProductDetails = () => {
   }
 
   if (isError) {
-    return toast.error(error);
+    return console.error(error);
   }
 
   // need to fix it
   let specs = [];
   if (product.metadata_specs) {
-    try {
-      const parsedSpecs = JSON.parse(product.metadata_specs);
-      specs = Object.entries(parsedSpecs).map(([label, value]) => ({
-        label,
-        value,
-      }));
-    } catch (e) {
-      console.error("Error parsing specs:", e);
-    }
+    specs = Object.entries(product.metadata_specs).map(([label, value]) => ({
+      label,
+      value,
+    }));
   }
 
   return (

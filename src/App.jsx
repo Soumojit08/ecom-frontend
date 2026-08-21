@@ -5,7 +5,7 @@ import About from "./pages/About";
 import Shop from "./pages/Shop";
 import PCBuilder from "./pages/PCBuilder";
 import Contact from "./pages/Contact";
-import { Toaster } from "react-hot-toast";
+import Toaster from "react-hot-toast";
 import ProductDetails from "./components/shop/ProductDetails";
 
 function App() {
