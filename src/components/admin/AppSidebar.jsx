@@ -13,7 +13,6 @@ import {
 import {
   BarChart3,
   ClipboardList,
-  LayoutDashboard,
   Package,
   Plus,
   Store,
@@ -25,10 +24,7 @@ import { UserButton, useUser } from "@clerk/react";
 const navigationGroups = [
   {
     label: "Overview",
-    items: [
-      { name: "Dashboard", icon: LayoutDashboard, isActive: true },
-      { name: "Analytics", icon: BarChart3 },
-    ],
+    items: [{ name: "Analytics", icon: BarChart3 }],
   },
   {
     label: "Manage",
