@@ -7,6 +7,7 @@ import { shadcn } from "@clerk/ui/themes";
 import AxiosProvider from "./providers/AxiosProvider";
  
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Tooltip } from "./components/ui/tooltip";
 
 const queryClient = new QueryClient();
 
@@ -19,7 +20,9 @@ createRoot(document.getElementById("root")).render(
     >
       <AxiosProvider>
         <BrowserRouter>
-          <App />
+          <Tooltip>
+            <App />
+          </Tooltip>
         </BrowserRouter>
       </AxiosProvider>
     </ClerkProvider>

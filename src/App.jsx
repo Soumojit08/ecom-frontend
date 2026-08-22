@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import About from "./pages/About";
@@ -12,11 +12,15 @@ import ProtectedRoute from "./auth/ProtectedRoutes";
 import Cart from "./pages/Cart";
 import Wishlist from "./pages/Wishlist";
 import Orders from "./pages/Orders";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function App() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith("/admin-dashboard");
+
   return (
     <>
-      <Navbar />
+      {!isAdminRoute && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
@@ -26,6 +30,7 @@ function App() {
         <Route path="/pc-builder" element={<PCBuilder />} />
         <Route path="/contact" element={<Contact />} />
         <Route element={<ProtectedRoute />}>
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/add-product" element={<AddProduct />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/wishlist" element={<Wishlist />} />
