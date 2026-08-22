@@ -54,7 +54,7 @@ const AppSidebar = () => {
       <SidebarContent>
         {navigationGroups.map((group) => (
           <SidebarGroup key={group.label}>
-            <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
+            <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden  font-sora tracking-wider">
               {group.label}
             </SidebarGroupLabel>
             <SidebarGroupContent>
