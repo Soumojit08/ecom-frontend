@@ -24,27 +24,63 @@ import { UserButton, useUser } from "@clerk/react";
 const navigationGroups = [
   {
     label: "Overview",
-    items: [{ name: "Analytics", icon: BarChart3 }],
+    items: [
+      {
+        name: "Analytics",
+        icon: BarChart3,
+        page: "analytics",
+      },
+    ],
   },
+
   {
     label: "Manage",
     items: [
-      { name: "Products", icon: Package },
-      { name: "Add product", icon: Plus },
-      { name: "Orders", icon: ClipboardList },
-      { name: "Delivery", icon: Truck },
+      {
+        name: "Products",
+        icon: Package,
+        page: "products",
+      },
+
+      {
+        name: "Add product",
+        icon: Plus,
+        page: "add-product",
+      },
+
+      {
+        name: "Orders",
+        icon: ClipboardList,
+        page: "orders",
+      },
+
+      {
+        name: "Delivery",
+        icon: Truck,
+        page: "delivery",
+      },
     ],
   },
+
   {
     label: "Accounts",
     items: [
-      { name: "Users", icon: Users },
-      { name: "Sellers", icon: Store },
+      {
+        name: "Users",
+        icon: Users,
+        page: "users",
+      },
+
+      {
+        name: "Sellers",
+        icon: Store,
+        page: "sellers",
+      },
     ],
   },
 ];
 
-const AppSidebar = () => {
+const AppSidebar = ({ active, setActive }) => {
   const { user } = useUser();
 
   return (
@@ -59,9 +95,13 @@ const AppSidebar = () => {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {group.items.map(({ name, icon: Icon, isActive }) => (
+                {group.items.map(({ name, icon: Icon, page }) => (
                   <SidebarMenuItem key={name}>
-                    <SidebarMenuButton isActive={isActive} tooltip={name}>
+                    <SidebarMenuButton
+                      isActive={active === page}
+                      tooltip={name}
+                      onClick={() => setActive(page)}
+                    >
                       <Icon />
                       <span>{name}</span>
                     </SidebarMenuButton>
