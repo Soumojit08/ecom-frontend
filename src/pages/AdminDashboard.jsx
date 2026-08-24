@@ -10,7 +10,7 @@ import Products from "./admin/Products";
 import Orders from "./admin/Orders";
 import Users from "./admin/Users";
 import Sellers from "./admin/Sellers";
-import AddProduct from "@/components/shop/AddProduct";
+import AddProduct from "@/components/admin/AddProduct";
 
 const Delivery = () => {
   return (

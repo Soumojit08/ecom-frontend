@@ -7,7 +7,7 @@ import PCBuilder from "./pages/PCBuilder";
 import Contact from "./pages/Contact";
 import { Toaster } from "react-hot-toast";
 import ProductDetails from "./components/shop/ProductDetails";
-import AddProduct from "./components/shop/AddProduct";
+import AddProduct from "./components/admin/AddProduct";
 import ProtectedRoute from "./auth/ProtectedRoutes";
 import Cart from "./pages/Cart";
 import Wishlist from "./pages/Wishlist";
