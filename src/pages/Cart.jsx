@@ -5,15 +5,20 @@ import axiosInstance from "@/lib/axios";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@clerk/react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
-const fetchCart = async () => {
-  const response = await axiosInstance.get("/api/cart");
+const fetchCart = async (getToken) => {
+  const token = await getToken();
+  const response = await axiosInstance.get("/api/cart", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
   return response.data?.data ?? null;
 };
 
 const Cart = () => {
-  const { isLoaded, isSignedIn } = useAuth();
+  const { getToken, isLoaded, isSignedIn } = useAuth();
+  const queryClient = useQueryClient();
   const {
     data: cart,
     isLoading,
@@ -22,8 +27,33 @@ const Cart = () => {
     refetch,
   } = useQuery({
     queryKey: ["cart"],
-    queryFn: fetchCart,
+    queryFn: () => fetchCart(getToken),
     enabled: isLoaded && isSignedIn,
+  });
+
+  const cartMutation = useMutation({
+    mutationFn: async ({ productId, quantity, remove = false }) => {
+      const token = await getToken();
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+
+      if (remove) {
+        return axiosInstance.delete(`/api/cart/items/${productId}`, config);
+      }
+
+      return axiosInstance.patch(
+        `/api/cart/items/${productId}`,
+        { quantity },
+        config,
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
+    onError: (mutationError) => {
+      toast.error(
+        mutationError.response?.data?.msg ?? "Could not update your cart",
+      );
+    },
   });
 
   if (!isLoaded || isLoading) {
@@ -52,7 +82,7 @@ const Cart = () => {
     );
   }
 
-  if (!cart) {
+  if (!cart || cart.cartItems.length === 0) {
     return <NullCart />;
   }
 
@@ -82,7 +112,15 @@ const Cart = () => {
         </div>
 
         <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <CartProduct items={items} />
+          <CartProduct
+            items={items}
+            onQuantityChange={(productId, quantity) =>
+              cartMutation.mutate({ productId, quantity })
+            }
+            onRemove={(productId) =>
+              cartMutation.mutate({ productId, remove: true })
+            }
+          />
           <CartSummary items={items} />
         </div>
       </div>

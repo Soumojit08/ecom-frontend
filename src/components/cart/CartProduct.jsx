@@ -32,7 +32,7 @@ const CartProduct = ({ items, onQuantityChange, onRemove }) => {
               key={item.id}
               className="grid gap-5 px-4 py-5 sm:grid-cols-[112px_minmax(0,1fr)_auto] sm:items-center sm:px-6"
             >
-              <div className="flex h-28 items-center justify-center rounded-lg bg-muted/60 p-3">
+              <div className="flex h-28 items-center justify-center rounded-lg p-3">
                 <img
                   src={item.image}
                   alt={item.name}
