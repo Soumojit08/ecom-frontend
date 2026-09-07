@@ -9,12 +9,39 @@ import {
   CardDescription,
 } from "./ui/card";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@clerk/react";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import axiosInstance from "@/lib/axios";
 
 const ProductCard = (props) => {
   const { className } = props;
+  const navigate = useNavigate();
+  const { getToken, isLoaded, isSignedIn } = useAuth();
+  const [isAdding, setIsAdding] = useState(false);
 
   const handleBuyNow = async () => {
-    console.log("Todo Add to Cart item");
+    if (!isLoaded || !isSignedIn) {
+      toast.error("Please sign in to add items to your cart");
+      return;
+    }
+
+    setIsAdding(true);
+    try {
+      const token = await getToken();
+      await axiosInstance.post(
+        "/api/cart/items",
+        { productId: Number(props.product.id), quantity: 1 },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      toast.success("Added to cart");
+      navigate("/cart");
+    } catch (error) {
+      toast.error(error.response?.data?.msg ?? "Could not add item to cart");
+    } finally {
+      setIsAdding(false);
+    }
   };
 
   return (
@@ -48,8 +75,8 @@ const ProductCard = (props) => {
           </div>
         </CardContent>
         <CardFooter className="pt-2 flex items-center ">
-          <Button size="lg" onClick={handleBuyNow}>
-            Buy now
+          <Button size="lg" onClick={handleBuyNow} disabled={isAdding}>
+            {isAdding ? "Adding..." : "Buy now"}
           </Button>
           <Link to={`/shop/${props.product.category}/${props.product.id}`}>
             <Button variant="outline" size="lg">

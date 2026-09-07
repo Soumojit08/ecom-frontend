@@ -24,9 +24,11 @@ import {
 } from "../ui/accordion";
 import { cn } from "@/lib/utils";
 import axiosInstance from "@/lib/axios";
-import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useNavigate, useParams } from "react-router-dom";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Spinner } from "../ui/spinner";
+import { useAuth } from "@clerk/react";
+import toast from "react-hot-toast";
 
 const DELIVERY_PERKS = [
   { icon: Truck, text: "Free delivery on orders above ₹500" },
@@ -36,6 +38,8 @@ const DELIVERY_PERKS = [
 
 const ProductDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { getToken, isLoaded, isSignedIn } = useAuth();
   const [quantity, setQuantity] = useState(1);
   const [pincode, setPincode] = useState("");
 
@@ -53,6 +57,34 @@ const ProductDetails = () => {
     queryKey: ["product", id],
     queryFn: fetchProductById,
   });
+
+  const addToCartMutation = useMutation({
+    mutationFn: async (redirectToCart) => {
+      const token = await getToken();
+      await axiosInstance.post(
+        "/api/cart/items",
+        { productId: Number(id), quantity },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      return redirectToCart;
+    },
+    onSuccess: (redirectToCart) => {
+      toast.success("Added to cart");
+      if (redirectToCart) navigate("/cart");
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.msg ?? "Could not add item to cart");
+    },
+  });
+
+  const handleAddToCart = (redirectToCart = false) => {
+    if (!isLoaded || !isSignedIn) {
+      toast.error("Please sign in to add items to your cart");
+      return;
+    }
+
+    addToCartMutation.mutate(redirectToCart);
+  };
 
   const increaseQty = () => {
     if (quantity < 10) setQuantity(quantity + 1);
@@ -214,10 +246,22 @@ const ProductDetails = () => {
 
           {/* CTAs */}
           <div className="flex gap-3 mb-8">
-            <Button variant="outline" size="lg" className="flex-1">
-              Add to Cart
+            <Button
+              variant="outline"
+              size="lg"
+              className="flex-1"
+              onClick={() => handleAddToCart()}
+              disabled={addToCartMutation.isPending}
+            >
+              {addToCartMutation.isPending ? "Adding..." : "Add to Cart"}
             </Button>
-            <Button variant="default" size="lg" className="flex-1">
+            <Button
+              variant="default"
+              size="lg"
+              className="flex-1"
+              onClick={() => handleAddToCart(true)}
+              disabled={addToCartMutation.isPending}
+            >
               Buy Now
             </Button>
           </div>
