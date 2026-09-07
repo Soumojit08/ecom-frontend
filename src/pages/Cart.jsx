@@ -1,32 +1,70 @@
 import CartProduct from "@/components/cart/CartProduct";
 import CartSummary from "@/components/cart/CartSummary";
-import products from "@/data";
-import { useState } from "react";
+import NullCart from "@/components/cart/NullCart";
+import axiosInstance from "@/lib/axios";
+import { Spinner } from "@/components/ui/spinner";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@clerk/react";
+import { useQuery } from "@tanstack/react-query";
 
-const sampleItems = products
-  .filter((product) => product.image && !product.image.startsWith("/images/"))
-  .slice(0, 2)
-  .map((product, index) => ({
-    ...product,
-    quantity: index === 0 ? 1 : 2,
-  }));
+const fetchCart = async () => {
+  const response = await axiosInstance.get("/api/cart");
+  return response.data?.data ?? null;
+};
 
 const Cart = () => {
-  const [items, setItems] = useState(sampleItems);
+  const { isLoaded, isSignedIn } = useAuth();
+  const {
+    data: cart,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["cart"],
+    queryFn: fetchCart,
+    enabled: isLoaded && isSignedIn,
+  });
 
-  const updateQuantity = (productId, quantity) => {
-    setItems((currentItems) =>
-      currentItems.map((item) =>
-        item.id === productId ? { ...item, quantity } : item,
-      ),
+  if (!isLoaded || isLoading) {
+    return (
+      <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center">
+        <Spinner />
+      </div>
     );
-  };
+  }
 
-  const removeItem = (productId) => {
-    setItems((currentItems) =>
-      currentItems.filter((item) => item.id !== productId),
+  if (isError) {
+    return (
+      <main className="flex min-h-[calc(100vh-5rem)] items-center justify-center px-4">
+        <div className="text-center">
+          <h1 className="font-sora text-xl font-semibold">
+            Could not load your cart
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {error?.response?.data?.msg ?? "Please try again."}
+          </p>
+          <Button className="mt-4" variant="outline" onClick={() => refetch()}>
+            Try again
+          </Button>
+        </div>
+      </main>
     );
-  };
+  }
+
+  if (!cart) {
+    return <NullCart />;
+  }
+
+  const items = cart.cartItems.map(({ product, quantity, productId }) => ({
+    id: productId,
+    name: product.name,
+    brand: product.brand,
+    category: product.category,
+    price: product.price,
+    image: product.image_url,
+    quantity,
+  }));
 
   return (
     <main className="min-h-[calc(100vh-5rem)] bg-muted/30 px-4 py-8 sm:px-8 lg:px-12">
@@ -44,11 +82,7 @@ const Cart = () => {
         </div>
 
         <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <CartProduct
-            items={items}
-            onQuantityChange={updateQuantity}
-            onRemove={removeItem}
-          />
+          <CartProduct items={items} />
           <CartSummary items={items} />
         </div>
       </div>

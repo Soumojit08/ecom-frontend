@@ -9,19 +9,22 @@ import {
 } from "../ui/card";
 
 const CartProduct = ({ items, onQuantityChange, onRemove }) => {
+  
   return (
     <Card>
       <CardHeader className="border-b">
         <CardTitle className="font-sora text-xl">My bag</CardTitle>
         <CardDescription>
-          {items.length} {items.length === 1 ? "item" : "items"} selected
+          {items.length === 0
+            ? "No items added to cart"
+            : `${items.length} ${items.length === 1 ? "item" : "items"} selected`}
         </CardDescription>
       </CardHeader>
 
       <CardContent className="divide-y p-0">
         {items.length === 0 ? (
           <div className="px-6 py-16 text-center text-muted-foreground">
-            Your bag is empty.
+            No items added to cart.
           </div>
         ) : (
           items.map((item) => (
@@ -54,12 +57,12 @@ const CartProduct = ({ items, onQuantityChange, onRemove }) => {
                       size="icon-sm"
                       aria-label={`Decrease ${item.name} quantity`}
                       onClick={() =>
-                        onQuantityChange(
+                        onQuantityChange?.(
                           item.id,
                           Math.max(1, item.quantity - 1),
                         )
                       }
-                      disabled={item.quantity <= 1}
+                      disabled={!onQuantityChange || item.quantity <= 1}
                     >
                       <Minus />
                     </Button>
@@ -71,12 +74,12 @@ const CartProduct = ({ items, onQuantityChange, onRemove }) => {
                       size="icon-sm"
                       aria-label={`Increase ${item.name} quantity`}
                       onClick={() =>
-                        onQuantityChange(
+                        onQuantityChange?.(
                           item.id,
                           Math.min(10, item.quantity + 1),
                         )
                       }
-                      disabled={item.quantity >= 10}
+                      disabled={!onQuantityChange || item.quantity >= 10}
                     >
                       <Plus />
                     </Button>
@@ -86,7 +89,8 @@ const CartProduct = ({ items, onQuantityChange, onRemove }) => {
                     size="icon-sm"
                     className="text-muted-foreground hover:text-destructive"
                     aria-label={`Remove ${item.name}`}
-                    onClick={() => onRemove(item.id)}
+                    onClick={() => onRemove?.(item.id)}
+                    disabled={!onRemove}
                   >
                     <Trash2 />
                   </Button>
