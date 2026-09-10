@@ -10,16 +10,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import useCart from "@/hooks/useCart";
 
-const fetchCart = async (getToken) => {
-  const token = await getToken();
-  const response = await axiosInstance.get("/api/cart", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+const fetchCart = async () => {
+  const response = await axiosInstance.get("/api/cart");
   return response.data?.data ?? null;
 };
 
 const Cart = () => {
-  const { getToken, isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn } = useAuth();
   const setCart = useCart((state) => state.setCart);
   const clearCart = useCart((state) => state.clearCart);
   const queryClient = useQueryClient();
@@ -31,8 +28,11 @@ const Cart = () => {
     refetch,
   } = useQuery({
     queryKey: ["cart"],
-    queryFn: () => fetchCart(getToken),
+    queryFn: fetchCart,
     enabled: isLoaded && isSignedIn,
+    staleTime: 30_000,
+    retry: 1,
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
@@ -46,17 +46,13 @@ const Cart = () => {
 
   const cartMutation = useMutation({
     mutationFn: async ({ productId, quantity, remove = false }) => {
-      const token = await getToken();
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-
       if (remove) {
-        return axiosInstance.delete(`/api/cart/items/${productId}`, config);
+        return axiosInstance.delete(`/api/cart/items/${productId}`);
       }
 
       return axiosInstance.patch(
         `/api/cart/items/${productId}`,
         { quantity },
-        config,
       );
     },
     onSuccess: () => {
@@ -127,6 +123,7 @@ const Cart = () => {
         <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
           <CartProduct
             items={items}
+            isUpdating={cartMutation.isPending}
             onQuantityChange={(productId, quantity) =>
               cartMutation.mutate({ productId, quantity })
             }

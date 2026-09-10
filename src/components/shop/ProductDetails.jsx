@@ -40,7 +40,7 @@ const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { getToken, isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn } = useAuth();
   const [quantity, setQuantity] = useState(1);
   const [pincode, setPincode] = useState("");
 
@@ -61,11 +61,9 @@ const ProductDetails = () => {
 
   const addToCartMutation = useMutation({
     mutationFn: async (redirectToCart) => {
-      const token = await getToken();
       await axiosInstance.post(
         "/api/cart/items",
         { productId: Number(id), quantity },
-        { headers: { Authorization: `Bearer ${token}` } },
       );
       return redirectToCart;
     },

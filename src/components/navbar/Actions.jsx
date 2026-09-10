@@ -10,7 +10,7 @@ import useCart from "@/hooks/useCart";
 import { useQuery } from "@tanstack/react-query";
 
 const Actions = () => {
-  const { getToken, isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn } = useAuth();
   const itemCount = useCart((state) => state.itemCount);
   const setCart = useCart((state) => state.setCart);
   const clearCart = useCart((state) => state.clearCart);
@@ -18,13 +18,13 @@ const Actions = () => {
   const { data: cart } = useQuery({
     queryKey: ["cart"],
     queryFn: async () => {
-      const token = await getToken();
-      const response = await axiosInstance.get("/api/cart", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axiosInstance.get("/api/cart");
       return response.data?.data ?? null;
     },
     enabled: isLoaded && isSignedIn,
+    staleTime: 30_000,
+    retry: 1,
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {

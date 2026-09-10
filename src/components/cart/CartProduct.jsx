@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "../ui/card";
 
-const CartProduct = ({ items, onQuantityChange, onRemove }) => {
+const CartProduct = ({ items, onQuantityChange, onRemove, isUpdating }) => {
   
   return (
     <Card>
@@ -62,7 +62,9 @@ const CartProduct = ({ items, onQuantityChange, onRemove }) => {
                           Math.max(1, item.quantity - 1),
                         )
                       }
-                      disabled={!onQuantityChange || item.quantity <= 1}
+                      disabled={
+                        isUpdating || !onQuantityChange || item.quantity <= 1
+                      }
                     >
                       <Minus />
                     </Button>
@@ -79,7 +81,9 @@ const CartProduct = ({ items, onQuantityChange, onRemove }) => {
                           Math.min(10, item.quantity + 1),
                         )
                       }
-                      disabled={!onQuantityChange || item.quantity >= 10}
+                      disabled={
+                        isUpdating || !onQuantityChange || item.quantity >= 10
+                      }
                     >
                       <Plus />
                     </Button>
@@ -90,7 +94,7 @@ const CartProduct = ({ items, onQuantityChange, onRemove }) => {
                     className="text-muted-foreground hover:text-destructive"
                     aria-label={`Remove ${item.name}`}
                     onClick={() => onRemove?.(item.id)}
-                    disabled={!onRemove}
+                    disabled={isUpdating || !onRemove}
                   >
                     <Trash2 />
                   </Button>

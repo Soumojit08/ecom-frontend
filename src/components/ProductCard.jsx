@@ -19,7 +19,7 @@ import { useQueryClient } from "@tanstack/react-query";
 const ProductCard = (props) => {
   const { className } = props;
   const navigate = useNavigate();
-  const { getToken, isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn } = useAuth();
   const queryClient = useQueryClient();
   const [isAdding, setIsAdding] = useState(false);
 
@@ -31,11 +31,9 @@ const ProductCard = (props) => {
 
     setIsAdding(true);
     try {
-      const token = await getToken();
       await axiosInstance.post(
         "/api/cart/items",
         { productId: Number(props.product.id), quantity: 1 },
-        { headers: { Authorization: `Bearer ${token}` } },
       );
       await queryClient.invalidateQueries({ queryKey: ["cart"] });
       toast.success("Added to cart");
