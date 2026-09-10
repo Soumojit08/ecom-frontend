@@ -25,7 +25,7 @@ import {
 import { cn } from "@/lib/utils";
 import axiosInstance from "@/lib/axios";
 import { useNavigate, useParams } from "react-router-dom";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Spinner } from "../ui/spinner";
 import { useAuth } from "@clerk/react";
 import toast from "react-hot-toast";
@@ -39,6 +39,7 @@ const DELIVERY_PERKS = [
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { getToken, isLoaded, isSignedIn } = useAuth();
   const [quantity, setQuantity] = useState(1);
   const [pincode, setPincode] = useState("");
@@ -69,6 +70,7 @@ const ProductDetails = () => {
       return redirectToCart;
     },
     onSuccess: (redirectToCart) => {
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
       toast.success("Added to cart");
       if (redirectToCart) navigate("/cart");
     },

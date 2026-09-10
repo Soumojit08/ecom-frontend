@@ -1,28 +1,33 @@
-import { devtools } from "zustand/middleware";
 import { create } from "zustand";
+import { devtools } from "zustand/middleware";
 
-const store = (set) => ({
-  items: [
-    {
-      productId: "",
-      quantity: 0,
-      price: 0,
+const normalizeCartItems = (cartItems = []) =>
+  cartItems.map(({ product, productId, quantity }) => ({
+    id: productId,
+    name: product.name,
+    brand: product.brand,
+    category: product.category,
+    price: product.price,
+    image: product.image_url,
+    quantity,
+  }));
+
+const useCart = create(
+  devtools((set) => ({
+    items: [],
+    itemCount: 0,
+
+    setCart: (cart) => {
+      const items = normalizeCartItems(cart?.cartItems);
+
+      set({
+        items,
+        itemCount: items.reduce((total, item) => total + item.quantity, 0),
+      });
     },
-  ],
 
-  addToCart: (productId) => {
-    set((state) => ({
-      itemsId: state.items,
-    }));
-  },
-
-  removeFromCart: (productId) => {
-    set((state) => ({
-      itemsId: state.itemsId,
-    }));
-  },
-});
-
-const useCart = create(devtools(store));
+    clearCart: () => set({ items: [], itemCount: 0 }),
+  })),
+);
 
 export default useCart;

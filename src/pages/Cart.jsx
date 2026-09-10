@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import CartProduct from "@/components/cart/CartProduct";
 import CartSummary from "@/components/cart/CartSummary";
 import NullCart from "@/components/cart/NullCart";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@clerk/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import useCart from "@/hooks/useCart";
 
 const fetchCart = async (getToken) => {
   const token = await getToken();
@@ -18,6 +20,8 @@ const fetchCart = async (getToken) => {
 
 const Cart = () => {
   const { getToken, isLoaded, isSignedIn } = useAuth();
+  const setCart = useCart((state) => state.setCart);
+  const clearCart = useCart((state) => state.clearCart);
   const queryClient = useQueryClient();
   const {
     data: cart,
@@ -30,6 +34,15 @@ const Cart = () => {
     queryFn: () => fetchCart(getToken),
     enabled: isLoaded && isSignedIn,
   });
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (!isSignedIn || !cart) {
+      clearCart();
+      return;
+    }
+    setCart(cart);
+  }, [cart, clearCart, isLoaded, isSignedIn, setCart]);
 
   const cartMutation = useMutation({
     mutationFn: async ({ productId, quantity, remove = false }) => {

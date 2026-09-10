@@ -14,11 +14,13 @@ import { useAuth } from "@clerk/react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import axiosInstance from "@/lib/axios";
+import { useQueryClient } from "@tanstack/react-query";
 
 const ProductCard = (props) => {
   const { className } = props;
   const navigate = useNavigate();
   const { getToken, isLoaded, isSignedIn } = useAuth();
+  const queryClient = useQueryClient();
   const [isAdding, setIsAdding] = useState(false);
 
   const handleBuyNow = async () => {
@@ -35,6 +37,7 @@ const ProductCard = (props) => {
         { productId: Number(props.product.id), quantity: 1 },
         { headers: { Authorization: `Bearer ${token}` } },
       );
+      await queryClient.invalidateQueries({ queryKey: ["cart"] });
       toast.success("Added to cart");
       navigate("/cart");
     } catch (error) {
