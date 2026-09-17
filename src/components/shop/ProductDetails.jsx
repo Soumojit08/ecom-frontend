@@ -77,6 +77,33 @@ const ProductDetails = () => {
     },
   });
 
+  const addToWishlistMutation = useMutation({
+    mutationFn: async () => {
+      await axiosInstance.post("/api/wishlist/items", {
+        productId: Number(id),
+      });
+      return;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["wishlist"] });
+      toast.success("Added to wishlist");
+    },
+    onError: (error) => {
+      toast.error(
+        error.response?.data?.msg ?? "Could not add item to wishlist",
+      );
+    },
+  });
+
+  const handleAddToWishlist = () => {
+    if (!isLoaded || !isSignedIn) {
+      toast.error("Please sign in to add items to your wishlist");
+      return;
+    }
+
+    addToWishlistMutation.mutate();
+  };
+
   const handleAddToCart = (redirectToCart = false) => {
     if (!isLoaded || !isSignedIn) {
       toast.error("Please sign in to add items to your cart");
@@ -163,9 +190,20 @@ const ProductDetails = () => {
           </div>
 
           <div className="flex gap-2 w-full">
-            <Button variant="outline" className="flex-1 gap-2">
-              <Heart size={18} />
-              Wishlist
+            <Button
+              variant="outline"
+              className="flex-1 gap-2"
+              onClick={handleAddToWishlist}
+              disabled={addToWishlistMutation.isPending}
+            >
+              {addToWishlistMutation.isPending ? (
+                "Adding..."
+              ) : (
+                <span className="flex items-center gap-2">
+                  <Heart size={18} />
+                  Wishlist
+                </span>
+              )}
             </Button>
             <Button variant="outline" className="flex-1 gap-2">
               <Share2 size={18} />

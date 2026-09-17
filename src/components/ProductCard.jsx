@@ -15,12 +15,18 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import axiosInstance from "@/lib/axios";
 import { useQueryClient } from "@tanstack/react-query";
+import useWishList from "@/hooks/useWishList";
 
 const ProductCard = (props) => {
   const { className } = props;
   const navigate = useNavigate();
   const { isLoaded, isSignedIn } = useAuth();
   const queryClient = useQueryClient();
+  const isWishlisted = useWishList((state) =>
+    state.isWishlisted(props.product.id),
+  );
+  const addWishlistItem = useWishList((state) => state.addWishlistItem);
+  const removeWishlistItem = useWishList((state) => state.removeWishlistItem);
   const [isAdding, setIsAdding] = useState(false);
 
   const handleBuyNow = async () => {
@@ -31,10 +37,10 @@ const ProductCard = (props) => {
 
     setIsAdding(true);
     try {
-      await axiosInstance.post(
-        "/api/cart/items",
-        { productId: Number(props.product.id), quantity: 1 },
-      );
+      await axiosInstance.post("/api/cart/items", {
+        productId: Number(props.product.id),
+        quantity: 1,
+      });
       await queryClient.invalidateQueries({ queryKey: ["cart"] });
       toast.success("Added to cart");
       navigate("/cart");
@@ -45,13 +51,35 @@ const ProductCard = (props) => {
     }
   };
 
+  const handleWishlistToggle = () => {
+    if (isWishlisted) {
+      removeWishlistItem(props.product.id);
+      return;
+    }
+
+    addWishlistItem(props.product);
+  };
+
   return (
     <>
       <Card className={`w-full max-w-xs gap-3 mb-4 ${className}`}>
         <CardHeader className="pb-0">
           <CardAction>
-            <Button variant="ghost" size="icon-lg">
-              {<Heart size={24} />}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-lg"
+              onClick={handleWishlistToggle}
+              className={
+                isWishlisted ? "text-primary" : "text-muted-foreground"
+              }
+              aria-label={
+                isWishlisted
+                  ? `Remove ${props.product.name} from wishlist`
+                  : `Save ${props.product.name} to wishlist`
+              }
+            >
+              <Heart size={24} className={isWishlisted ? "fill-current" : ""} />
             </Button>
           </CardAction>
         </CardHeader>
