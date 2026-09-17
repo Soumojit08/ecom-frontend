@@ -1,7 +1,8 @@
 import { ArrowRight, Heart, ShoppingBag, Trash2 } from "lucide-react";
 import { useAuth } from "@clerk/react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
+import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import axiosInstance from "@/lib/axios";
@@ -10,6 +11,13 @@ import useWishList from "@/hooks/useWishList";
 
 const fetchWishlist = async () => {
   const response = await axiosInstance.get("/api/wishlist");
+  return response.data?.data ?? null;
+};
+
+const removeFromWishList = async (productId) => {
+  const response = await axiosInstance.delete(
+    `/api/wishlist/items/${productId}`,
+  );
   return response.data?.data ?? null;
 };
 
@@ -22,7 +30,9 @@ const formatPrice = (value) =>
 
 const Wishlist = () => {
   const { isLoaded, isSignedIn } = useAuth();
+  const queryClient = useQueryClient();
   const setWishlist = useWishList((state) => state.setWishlist);
+  const removeWishlistItem = useWishList((state) => state.removeWishlistItem);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["wishlist"],
@@ -38,6 +48,16 @@ const Wishlist = () => {
       setWishlist(data);
     }
   }, [data, setWishlist]);
+
+  const handleRemoveFromWishlist = async (productId) => {
+    try {
+      await removeFromWishList(productId);
+      removeWishlistItem(productId);
+      await queryClient.invalidateQueries({ queryKey: ["wishlist"] });
+    } catch (error) {
+      toast.error(error?.response?.data?.msg ?? "Could not remove item");
+    }
+  };
 
   const items =
     data?.wishListItems?.map(({ productId, product }) => ({
@@ -187,6 +207,9 @@ const Wishlist = () => {
                           size="icon-sm"
                           className="text-muted-foreground hover:text-destructive"
                           aria-label={`Remove ${item.name} from wishlist`}
+                          onClick={() =>
+                            handleRemoveFromWishlist(item.productId ?? item.id)
+                          }
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
