@@ -1,11 +1,10 @@
-import axiosInstance from "@/lib/axios";
 import { Input } from "../ui/input";
 import { useState } from "react";
 import { Label } from "../ui/label";
 import { Field, FieldGroup } from "../ui/field";
 import { Button } from "../ui/button";
-import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { useAddProduct } from "@/hooks/useProducts";
 
 const AddProduct = () => {
   const [brand, setBrand] = useState("");
@@ -13,16 +12,7 @@ const AddProduct = () => {
   const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
 
-  const addProduct = async (formData) => {
-    const res = await axiosInstance.post("/api/add-product", formData);
-    return res.data;
-  };
-
-  const mutation = useMutation({
-    mutationFn: addProduct,
-    onSuccess: () => toast.success("Product added"),
-    onError: () => toast.error("Failed Adding Product"),
-  });
+  const mutation = useAddProduct();
 
   const handleSubmit = (e) => {
     e.preventDefault();

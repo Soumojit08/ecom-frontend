@@ -2,38 +2,30 @@ import { useEffect } from "react";
 import CartProduct from "@/components/cart/CartProduct";
 import CartSummary from "@/components/cart/CartSummary";
 import NullCart from "@/components/cart/NullCart";
-import axiosInstance from "@/lib/axios";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@clerk/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
 import useCart from "@/hooks/useCart";
-
-const fetchCart = async () => {
-  const response = await axiosInstance.get("/api/cart");
-  return response.data?.data ?? null;
-};
+import {
+  useCartData,
+  useRemoveCartItem,
+  useUpdateCartItem,
+} from "@/hooks/useCartData";
 
 const Cart = () => {
   const { isLoaded, isSignedIn } = useAuth();
   const setCart = useCart((state) => state.setCart);
   const clearCart = useCart((state) => state.clearCart);
-  const queryClient = useQueryClient();
   const {
     data: cart,
     isLoading,
     isError,
     error,
     refetch,
-  } = useQuery({
-    queryKey: ["cart"],
-    queryFn: fetchCart,
-    enabled: isLoaded && isSignedIn,
-    staleTime: 30_000,
-    retry: 1,
-    refetchOnWindowFocus: false,
-  });
+  } = useCartData({ enabled: isLoaded && isSignedIn });
+
+  const cartUpdateMutation = useUpdateCartItem();
+  const cartRemoveMutation = useRemoveCartItem();
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -44,26 +36,17 @@ const Cart = () => {
     setCart(cart);
   }, [cart, clearCart, isLoaded, isSignedIn, setCart]);
 
-  const cartMutation = useMutation({
-    mutationFn: async ({ productId, quantity, remove = false }) => {
+  const cartMutation = {
+    isPending: cartUpdateMutation.isPending || cartRemoveMutation.isPending,
+    mutate: ({ productId, quantity, remove = false }) => {
       if (remove) {
-        return axiosInstance.delete(`/api/cart/items/${productId}`);
+        cartRemoveMutation.mutate(productId);
+        return;
       }
 
-      return axiosInstance.patch(
-        `/api/cart/items/${productId}`,
-        { quantity },
-      );
+      cartUpdateMutation.mutate({ productId, quantity });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
-    },
-    onError: (mutationError) => {
-      toast.error(
-        mutationError.response?.data?.msg ?? "Could not update your cart",
-      );
-    },
-  });
+  };
 
   if (!isLoaded || isLoading) {
     return (

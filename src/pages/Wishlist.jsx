@@ -1,25 +1,17 @@
 import { ArrowRight, Heart, ShoppingBag, Trash2 } from "lucide-react";
 import { useAuth } from "@clerk/react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import axiosInstance from "@/lib/axios";
 import { Spinner } from "@/components/ui/spinner";
+import { useAddToCart } from "@/hooks/useCartData";
 import useWishList from "@/hooks/useWishList";
-
-const fetchWishlist = async () => {
-  const response = await axiosInstance.get("/api/wishlist");
-  return response.data?.data ?? null;
-};
-
-const removeFromWishList = async (productId) => {
-  const response = await axiosInstance.delete(
-    `/api/wishlist/items/${productId}`,
-  );
-  return response.data?.data ?? null;
-};
+import {
+  useRemoveWishlistItem,
+  useWishlistData,
+} from "@/hooks/useWishlistData";
+import { Link } from "react-router-dom";
 
 const formatPrice = (value) =>
   new Intl.NumberFormat("en-IN", {
@@ -30,17 +22,13 @@ const formatPrice = (value) =>
 
 const Wishlist = () => {
   const { isLoaded, isSignedIn } = useAuth();
-  const queryClient = useQueryClient();
   const setWishlist = useWishList((state) => state.setWishlist);
   const removeWishlistItem = useWishList((state) => state.removeWishlistItem);
+  const removeWishlistMutation = useRemoveWishlistItem();
+  const addToCartMutation = useAddToCart();
 
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["wishlist"],
-    queryFn: fetchWishlist,
+  const { data, isLoading, isError, error } = useWishlistData({
     enabled: isLoaded && isSignedIn,
-    staleTime: 30_000,
-    retry: 1,
-    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
@@ -50,13 +38,20 @@ const Wishlist = () => {
   }, [data, setWishlist]);
 
   const handleRemoveFromWishlist = async (productId) => {
-    try {
-      await removeFromWishList(productId);
-      removeWishlistItem(productId);
-      await queryClient.invalidateQueries({ queryKey: ["wishlist"] });
-    } catch (error) {
-      toast.error(error?.response?.data?.msg ?? "Could not remove item");
+    removeWishlistMutation.mutate(productId, {
+      onSuccess: () => {
+        removeWishlistItem(productId);
+      },
+    });
+  };
+
+  const handleAddToCart = (productId) => {
+    if (!isLoaded || !isSignedIn) {
+      toast.error("Please sign in to add items to your cart");
+      return;
     }
+
+    addToCartMutation.mutate({ productId, quantity: 1 });
   };
 
   const items =
@@ -128,8 +123,10 @@ const Wishlist = () => {
           </div>
 
           <Button variant="outline" className="w-fit gap-2 rounded-full">
-            Continue shopping
-            <ArrowRight className="h-4 w-4" />
+            <Link to="/shop" className="flex items-center gap-2">
+              Continue shopping
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </Button>
         </div>
 
@@ -147,8 +144,10 @@ const Wishlist = () => {
                 and buy.
               </p>
               <Button className="mt-6 gap-2 rounded-full">
-                Explore products
-                <ArrowRight className="h-4 w-4" />
+                <Link to="/shop" className="flex items-center gap-2">
+                  Explore products
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
               </Button>
             </CardContent>
           </Card>
@@ -197,9 +196,11 @@ const Wishlist = () => {
                           variant="secondary"
                           size="sm"
                           className="rounded-full"
+                          onClick={() => handleAddToCart(item.productId ?? item.id)}
+                          disabled={addToCartMutation.isPending}
                         >
                           <ShoppingBag className="mr-1 h-4 w-4" />
-                          Add to cart
+                          {addToCartMutation.isPending ? "Adding..." : "Add to cart"}
                         </Button>
                         <Button
                           type="button"

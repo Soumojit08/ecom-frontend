@@ -1,25 +1,14 @@
-import axiosInstance from "@/lib/axios";
 import ProductCard from "../ProductCard";
 import { Spinner } from "../ui/spinner";
-import { useQuery } from "@tanstack/react-query";
-import toast from "react-hot-toast";
+import { useProducts } from "@/hooks/useProducts";
 
-const fetchProducts = async () => {
-  const response = await axiosInstance.get("/api/get-product");
-  console.log(response.data.data);
-  return response.data.data;
-};
-
-const Products = () => {
+const Products = ({ category, search }) => {
   const {
     data: products = [],
     isLoading,
     isError,
     error,
-  } = useQuery({
-    queryKey: ["products"],
-    queryFn: fetchProducts,
-  });
+  } = useProducts({ category, search });
 
   if (isLoading) {
     return (
@@ -30,7 +19,11 @@ const Products = () => {
   }
 
   if (isError) {
-    return toast.error(error);
+    return (
+      <div className="w-full h-full flex items-center justify-center text-destructive">
+        {error?.message ?? "Could not load products."}
+      </div>
+    );
   }
 
   return (

@@ -13,20 +13,25 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@clerk/react";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import axiosInstance from "@/lib/axios";
-import { useQueryClient } from "@tanstack/react-query";
 import useWishList from "@/hooks/useWishList";
+import { useAddToCart } from "@/hooks/useCartData";
+import {
+  useAddWishlistItem,
+  useRemoveWishlistItem,
+} from "@/hooks/useWishlistData";
 
 const ProductCard = (props) => {
   const { className } = props;
   const navigate = useNavigate();
   const { isLoaded, isSignedIn } = useAuth();
-  const queryClient = useQueryClient();
   const isWishlisted = useWishList((state) =>
     state.isWishlisted(props.product.id),
   );
   const addWishlistItem = useWishList((state) => state.addWishlistItem);
   const removeWishlistItem = useWishList((state) => state.removeWishlistItem);
+  const addToCartMutation = useAddToCart();
+  const addWishlistMutation = useAddWishlistItem();
+  const removeWishlistMutation = useRemoveWishlistItem();
   const [isAdding, setIsAdding] = useState(false);
 
   const handleBuyNow = async () => {
@@ -36,28 +41,28 @@ const ProductCard = (props) => {
     }
 
     setIsAdding(true);
-    try {
-      await axiosInstance.post("/api/cart/items", {
-        productId: Number(props.product.id),
-        quantity: 1,
-      });
-      await queryClient.invalidateQueries({ queryKey: ["cart"] });
-      toast.success("Added to cart");
-      navigate("/cart");
-    } catch (error) {
-      toast.error(error.response?.data?.msg ?? "Could not add item to cart");
-    } finally {
-      setIsAdding(false);
-    }
+    addToCartMutation.mutate(
+      { productId: props.product.id, quantity: 1 },
+      {
+        onSuccess: () => {
+          navigate("/cart");
+        },
+        onSettled: () => setIsAdding(false),
+      },
+    );
   };
 
   const handleWishlistToggle = () => {
     if (isWishlisted) {
-      removeWishlistItem(props.product.id);
+      removeWishlistMutation.mutate(props.product.id, {
+        onSuccess: () => removeWishlistItem(props.product.id),
+      });
       return;
     }
 
-    addWishlistItem(props.product);
+    addWishlistMutation.mutate(props.product.id, {
+      onSuccess: () => addWishlistItem(props.product),
+    });
   };
 
   return (

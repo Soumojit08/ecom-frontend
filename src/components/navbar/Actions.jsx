@@ -5,9 +5,8 @@ import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Show, SignInButton, UserButton } from "@clerk/react";
 import { useAuth } from "@clerk/react";
-import axiosInstance from "@/lib/axios";
 import useCart from "@/hooks/useCart";
-import { useQuery } from "@tanstack/react-query";
+import { useCartData } from "@/hooks/useCartData";
 
 const Actions = () => {
   const { isLoaded, isSignedIn } = useAuth();
@@ -15,17 +14,7 @@ const Actions = () => {
   const setCart = useCart((state) => state.setCart);
   const clearCart = useCart((state) => state.clearCart);
 
-  const { data: cart } = useQuery({
-    queryKey: ["cart"],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/api/cart");
-      return response.data?.data ?? null;
-    },
-    enabled: isLoaded && isSignedIn,
-    staleTime: 30_000,
-    retry: 1,
-    refetchOnWindowFocus: false,
-  });
+  const { data: cart } = useCartData({ enabled: isLoaded && isSignedIn });
 
   useEffect(() => {
     if (cart !== undefined) setCart(cart);

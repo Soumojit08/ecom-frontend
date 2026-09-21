@@ -1,20 +1,9 @@
 import ProductTable from "@/components/admin/ProductTable";
-import { useQuery } from "@tanstack/react-query";
-import axiosInstance from "@/lib/axios";
 import { Spinner } from "@/components/ui/spinner";
+import { useProducts } from "@/hooks/useProducts";
 
 const Products = () => {
-  const {
-    data: products = [],
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ["products"],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/api/get-product");
-      return response.data.data ?? [];
-    },
-  });
+  const { data: products = [], isLoading, isError } = useProducts();
 
   return (
     <div className="p-6">

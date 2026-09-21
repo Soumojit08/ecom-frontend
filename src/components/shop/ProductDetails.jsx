@@ -23,12 +23,16 @@ import {
   AccordionTrigger,
 } from "../ui/accordion";
 import { cn } from "@/lib/utils";
-import axiosInstance from "@/lib/axios";
 import { useNavigate, useParams } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Spinner } from "../ui/spinner";
 import { useAuth } from "@clerk/react";
 import toast from "react-hot-toast";
+import { useAddToCart } from "@/hooks/useCartData";
+import {
+  useAddWishlistItem,
+  useRemoveWishlistItem,
+} from "@/hooks/useWishlistData";
+import { useProductById } from "@/hooks/useProducts";
 
 const DELIVERY_PERKS = [
   { icon: Truck, text: "Free delivery on orders above ₹500" },
@@ -39,61 +43,15 @@ const DELIVERY_PERKS = [
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { isLoaded, isSignedIn } = useAuth();
   const [quantity, setQuantity] = useState(1);
   const [pincode, setPincode] = useState("");
 
-  async function fetchProductById() {
-    const response = await axiosInstance.get(`/api/get-product/${id}`);
-    return response.data.data;
-  }
+  const { data: product, isLoading, isError, error } = useProductById(id);
 
-  const {
-    data: product,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
-    queryKey: ["product", id],
-    queryFn: fetchProductById,
-  });
-
-  const addToCartMutation = useMutation({
-    mutationFn: async (redirectToCart) => {
-      await axiosInstance.post(
-        "/api/cart/items",
-        { productId: Number(id), quantity },
-      );
-      return redirectToCart;
-    },
-    onSuccess: (redirectToCart) => {
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
-      toast.success("Added to cart");
-      if (redirectToCart) navigate("/cart");
-    },
-    onError: (error) => {
-      toast.error(error.response?.data?.msg ?? "Could not add item to cart");
-    },
-  });
-
-  const addToWishlistMutation = useMutation({
-    mutationFn: async () => {
-      await axiosInstance.post("/api/wishlist/items", {
-        productId: Number(id),
-      });
-      return;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["wishlist"] });
-      toast.success("Added to wishlist");
-    },
-    onError: (error) => {
-      toast.error(
-        error.response?.data?.msg ?? "Could not add item to wishlist",
-      );
-    },
-  });
+  const addToCartMutation = useAddToCart();
+  const addToWishlistMutation = useAddWishlistItem();
+  const removeFromWishlistMutation = useRemoveWishlistItem();
 
   const handleAddToWishlist = () => {
     if (!isLoaded || !isSignedIn) {
@@ -101,7 +59,7 @@ const ProductDetails = () => {
       return;
     }
 
-    addToWishlistMutation.mutate();
+    addToWishlistMutation.mutate(Number(id));
   };
 
   const handleAddToCart = (redirectToCart = false) => {
@@ -110,7 +68,14 @@ const ProductDetails = () => {
       return;
     }
 
-    addToCartMutation.mutate(redirectToCart);
+    addToCartMutation.mutate(
+      { productId: Number(id), quantity },
+      {
+        onSuccess: () => {
+          if (redirectToCart) navigate("/cart");
+        },
+      },
+    );
   };
 
   const increaseQty = () => {
