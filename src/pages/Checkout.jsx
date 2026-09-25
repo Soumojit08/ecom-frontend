@@ -27,14 +27,9 @@ const paymentOptions = [
     description: "Pay when your order arrives",
   },
   {
-    id: "upi",
-    label: "UPI / Wallet",
-    description: "Pay using GPay, PhonePe, Paytm",
-  },
-  {
-    id: "card",
-    label: "Debit / Credit card",
-    description: "Secure card payment",
+    id: "razorpay",
+    label: "Razorpay",
+    description: "Secure card, UPI, wallet and net banking",
   },
 ];
 
@@ -103,7 +98,19 @@ const Checkout = () => {
     formData.state &&
     formData.pincode;
 
-  const nextStep = () => setStep((current) => Math.min(current + 1, 3));
+  const nextStep = () => {
+    if (step === 2) {
+      navigate("/payment", {
+        state: {
+          address: activeAddress,
+          paymentMethod: selectedPayment,
+        },
+      });
+      return;
+    }
+
+    setStep((current) => Math.min(current + 1, 3));
+  };
   const prevStep = () => setStep((current) => Math.max(current - 1, 1));
 
   const updateField = (field) => (event) =>
