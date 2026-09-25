@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   MapPin,
@@ -18,30 +18,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import useCart from "@/hooks/useCart";
 import { useCreateOrder } from "@/hooks/useOrders";
-
-// Demo seed data — remove once addresses come from the user's account.
-const demoAddresses = [
-  {
-    id: "home",
-    label: "Home",
-    name: "Soumojit Banerjee",
-    phone: "+91 74399 32564",
-    address: "23 Lakeview Road, Sector 5",
-    city: "Kolkata",
-    state: "West Bengal",
-    pincode: "711112",
-  },
-  {
-    id: "office",
-    label: "Office",
-    name: "Soumojit Banerjee",
-    phone: "+91 74399 32564",
-    address: "12 B.T. Road, Near City Centre",
-    city: "Kolkata",
-    state: "West Bengal",
-    pincode: "700001",
-  },
-];
+import { useAddressData, useSaveAddress } from "@/hooks/useAddressData";
 
 const paymentOptions = [
   {
@@ -62,12 +39,10 @@ const paymentOptions = [
 ];
 
 const emptyForm = {
-  name: "",
-  phone: "",
-  address: "",
   city: "",
-  state: "",
+  country: "",
   pincode: "",
+  phone: "",
 };
 
 const formatPrice = (value) =>
@@ -87,19 +62,35 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { items } = useCart();
   const createOrderMutation = useCreateOrder();
+  const { data: addressData = [], isLoading: isAddressLoading } =
+    useAddressData();
+  const saveAddressMutation = useSaveAddress();
 
   const [step, setStep] = useState(1);
-
-  // Swap this initial state to [] to see the empty-state flow.
-  const [addresses, setAddresses] = useState(demoAddresses);
-  const [selectedAddressId, setSelectedAddressId] = useState(
-    demoAddresses[0]?.id ?? null,
-  );
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [selectedPayment, setSelectedPayment] = useState("cod");
-  const [showAddressForm, setShowAddressForm] = useState(
-    addresses.length === 0,
-  );
+  const [showAddressForm, setShowAddressForm] = useState(false);
   const [formData, setFormData] = useState(emptyForm);
+
+  const addresses = useMemo(
+    () => (Array.isArray(addressData) ? addressData : []),
+    [addressData],
+  );
+
+  const activeAddress = useMemo(
+    () =>
+      addresses.find((address) => address.id === selectedAddressId) ??
+      addresses.find((address) => address.isDefault) ??
+      addresses[0] ??
+      null,
+    [addresses, selectedAddressId],
+  );
+
+  useEffect(() => {
+    if (!selectedAddressId && activeAddress) {
+      setSelectedAddressId(activeAddress.id);
+    }
+  }, [activeAddress, selectedAddressId]);
 
   const subtotal = useMemo(
     () =>
@@ -112,16 +103,8 @@ const Checkout = () => {
   const delivery = subtotal >= 5000 ? 0 : 99;
   const total = subtotal + delivery;
 
-  const activeAddress =
-    addresses.find((a) => a.id === selectedAddressId) ?? null;
-
   const filledAddress =
-    formData.name &&
-    formData.phone &&
-    formData.address &&
-    formData.city &&
-    formData.state &&
-    formData.pincode;
+    formData.city && formData.country && formData.pincode && formData.phone;
 
   const nextStep = () => setStep((current) => Math.min(current + 1, 3));
   const prevStep = () => setStep((current) => Math.max(current - 1, 1));
@@ -132,16 +115,21 @@ const Checkout = () => {
   const handleAddressSubmit = () => {
     if (!filledAddress) return;
 
-    const newAddress = {
-      id: `custom-${Date.now()}`,
-      label: "New address",
-      ...formData,
+    const payload = {
+      city: formData.city,
+      pincode: formData.pincode,
+      country: formData.country || "India",
+      phone: formData.phone,
+      isDefault: addresses.length === 0,
     };
 
-    setAddresses((current) => [...current, newAddress]);
-    setSelectedAddressId(newAddress.id);
-    setShowAddressForm(false);
-    setFormData(emptyForm);
+    saveAddressMutation.mutate(payload, {
+      onSuccess: (savedAddress) => {
+        setSelectedAddressId(Number(savedAddress?.id ?? Date.now()));
+        setShowAddressForm(false);
+        setFormData(emptyForm);
+      },
+    });
   };
 
   const handlePlaceOrder = () => {
@@ -241,7 +229,11 @@ const Checkout = () => {
                   Select delivery address
                 </h2>
 
-                {addresses.length === 0 && !showAddressForm ? (
+                {isAddressLoading ? (
+                  <div className="rounded-lg border border-dashed py-10 text-center text-sm text-muted-foreground">
+                    Loading saved addresses...
+                  </div>
+                ) : addresses.length === 0 && !showAddressForm ? (
                   <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed py-10 text-center">
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
                       <MapPin className="size-5" />
@@ -277,7 +269,7 @@ const Checkout = () => {
                           )}
                         </div>
                         <p className="mt-1 text-sm">
-                          {address.name} · {address.phone}
+                          {address.name} | Ph - {address.phone}
                         </p>
                         <p className="mt-0.5 text-sm text-muted-foreground">
                           {address.address}, {address.city}, {address.state} -{" "}
@@ -303,14 +295,6 @@ const Checkout = () => {
                   <div className="space-y-4 rounded-lg border p-5">
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div className="space-y-1.5">
-                        <Label htmlFor="name">Full name</Label>
-                        <Input
-                          id="name"
-                          value={formData.name}
-                          onChange={updateField("name")}
-                        />
-                      </div>
-                      <div className="space-y-1.5">
                         <Label htmlFor="phone">Phone number</Label>
                         <Input
                           id="phone"
@@ -318,32 +302,23 @@ const Checkout = () => {
                           onChange={updateField("phone")}
                         />
                       </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="country">Country</Label>
+                        <Input
+                          id="country"
+                          value={formData.country}
+                          onChange={updateField("country")}
+                        />
+                      </div>
                     </div>
 
-                    <div className="space-y-1.5">
-                      <Label htmlFor="address">Street address</Label>
-                      <Input
-                        id="address"
-                        value={formData.address}
-                        onChange={updateField("address")}
-                      />
-                    </div>
-
-                    <div className="grid gap-4 sm:grid-cols-3">
+                    <div className="grid gap-4 sm:grid-cols-2">
                       <div className="space-y-1.5">
                         <Label htmlFor="city">City</Label>
                         <Input
                           id="city"
                           value={formData.city}
                           onChange={updateField("city")}
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="state">State</Label>
-                        <Input
-                          id="state"
-                          value={formData.state}
-                          onChange={updateField("state")}
                         />
                       </div>
                       <div className="space-y-1.5">
@@ -366,10 +341,14 @@ const Checkout = () => {
                         </Button>
                       )}
                       <Button
-                        disabled={!filledAddress}
+                        disabled={
+                          !filledAddress || saveAddressMutation.isPending
+                        }
                         onClick={handleAddressSubmit}
                       >
-                        Save address
+                        {saveAddressMutation.isPending
+                          ? "Saving..."
+                          : "Save address"}
                       </Button>
                     </div>
                   </div>
