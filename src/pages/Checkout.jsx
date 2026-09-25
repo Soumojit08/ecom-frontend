@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   MapPin,
@@ -39,10 +39,13 @@ const paymentOptions = [
 ];
 
 const emptyForm = {
-  city: "",
-  country: "",
-  pincode: "",
+  name: "",
   phone: "",
+  address: "",
+  city: "",
+  state: "",
+  country: "India",
+  pincode: "",
 };
 
 const formatPrice = (value) =>
@@ -62,8 +65,7 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { items } = useCart();
   const createOrderMutation = useCreateOrder();
-  const { data: addressData = [], isLoading: isAddressLoading } =
-    useAddressData();
+  const { data: addressData, isLoading: isAddressLoading } = useAddressData();
   const saveAddressMutation = useSaveAddress();
 
   const [step, setStep] = useState(1);
@@ -72,25 +74,15 @@ const Checkout = () => {
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [formData, setFormData] = useState(emptyForm);
 
-  const addresses = useMemo(
-    () => (Array.isArray(addressData) ? addressData : []),
-    [addressData],
-  );
+  const addresses = Array.isArray(addressData) ? addressData : [];
 
-  const activeAddress = useMemo(
-    () =>
-      addresses.find((address) => address.id === selectedAddressId) ??
-      addresses.find((address) => address.isDefault) ??
-      addresses[0] ??
-      null,
-    [addresses, selectedAddressId],
-  );
-
-  useEffect(() => {
-    if (!selectedAddressId && activeAddress) {
-      setSelectedAddressId(activeAddress.id);
-    }
-  }, [activeAddress, selectedAddressId]);
+  // Derived, not stored in state — no effect needed to "sync" it,
+  // so there's nothing here that can trigger a render loop.
+  const activeAddress =
+    addresses.find((address) => address.id === selectedAddressId) ??
+    addresses.find((address) => address.isDefault) ??
+    addresses[0] ??
+    null;
 
   const subtotal = useMemo(
     () =>
@@ -104,7 +96,12 @@ const Checkout = () => {
   const total = subtotal + delivery;
 
   const filledAddress =
-    formData.city && formData.country && formData.pincode && formData.phone;
+    formData.name &&
+    formData.phone &&
+    formData.address &&
+    formData.city &&
+    formData.state &&
+    formData.pincode;
 
   const nextStep = () => setStep((current) => Math.min(current + 1, 3));
   const prevStep = () => setStep((current) => Math.max(current - 1, 1));
@@ -116,16 +113,21 @@ const Checkout = () => {
     if (!filledAddress) return;
 
     const payload = {
-      city: formData.city,
-      pincode: formData.pincode,
-      country: formData.country || "India",
+      name: formData.name,
       phone: formData.phone,
+      address: formData.address,
+      city: formData.city,
+      state: formData.state,
+      country: formData.country || "India",
+      pincode: formData.pincode,
       isDefault: addresses.length === 0,
     };
 
     saveAddressMutation.mutate(payload, {
       onSuccess: (savedAddress) => {
-        setSelectedAddressId(Number(savedAddress?.id ?? Date.now()));
+        if (savedAddress?.id != null) {
+          setSelectedAddressId(savedAddress.id);
+        }
         setShowAddressForm(false);
         setFormData(emptyForm);
       },
@@ -257,19 +259,23 @@ const Checkout = () => {
                         type="button"
                         onClick={() => setSelectedAddressId(address.id)}
                         className={`w-full rounded-lg border px-4 py-3.5 text-left transition ${
-                          selectedAddressId === address.id
+                          selectedAddressId === address.id ||
+                          (!selectedAddressId &&
+                            address.id === activeAddress?.id)
                             ? "border-primary bg-primary/5"
                             : "border-border hover:border-primary/40"
                         }`}
                       >
                         <div className="flex items-center justify-between gap-3">
-                          <span className="font-medium">{address.label}</span>
-                          {selectedAddressId === address.id && (
+                          <span className="font-medium">
+                            {address.label || "Address"}
+                          </span>
+                          {activeAddress?.id === address.id && (
                             <Badge className="font-normal">Selected</Badge>
                           )}
                         </div>
                         <p className="mt-1 text-sm">
-                          {address.name} | Ph - {address.phone}
+                          {address.name} · {address.phone}
                         </p>
                         <p className="mt-0.5 text-sm text-muted-foreground">
                           {address.address}, {address.city}, {address.state} -{" "}
@@ -295,6 +301,14 @@ const Checkout = () => {
                   <div className="space-y-4 rounded-lg border p-5">
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div className="space-y-1.5">
+                        <Label htmlFor="name">Full name</Label>
+                        <Input
+                          id="name"
+                          value={formData.name}
+                          onChange={updateField("name")}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
                         <Label htmlFor="phone">Phone number</Label>
                         <Input
                           id="phone"
@@ -302,23 +316,32 @@ const Checkout = () => {
                           onChange={updateField("phone")}
                         />
                       </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="country">Country</Label>
-                        <Input
-                          id="country"
-                          value={formData.country}
-                          onChange={updateField("country")}
-                        />
-                      </div>
                     </div>
 
-                    <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="address">Street address</Label>
+                      <Input
+                        id="address"
+                        value={formData.address}
+                        onChange={updateField("address")}
+                      />
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-3">
                       <div className="space-y-1.5">
                         <Label htmlFor="city">City</Label>
                         <Input
                           id="city"
                           value={formData.city}
                           onChange={updateField("city")}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="state">State</Label>
+                        <Input
+                          id="state"
+                          value={formData.state}
+                          onChange={updateField("state")}
                         />
                       </div>
                       <div className="space-y-1.5">
@@ -413,7 +436,7 @@ const Checkout = () => {
                         <Pencil className="size-3" /> Edit
                       </button>
                     </div>
-                    {activeAddress && (
+                    {activeAddress ? (
                       <>
                         <p className="mt-2 font-medium">{activeAddress.name}</p>
                         <p className="text-sm text-muted-foreground">
@@ -424,6 +447,10 @@ const Checkout = () => {
                           {activeAddress.state} - {activeAddress.pincode}
                         </p>
                       </>
+                    ) : (
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        No address selected.
+                      </p>
                     )}
                   </div>
 
