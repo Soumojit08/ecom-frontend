@@ -10,6 +10,7 @@ import ProductDetails from "./components/shop/ProductDetails";
 import AddProduct from "./components/admin/AddProduct";
 import ProtectedRoute from "./auth/ProtectedRoutes";
 import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
 import Wishlist from "./pages/Wishlist";
 import Orders from "./pages/Orders";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -33,6 +34,7 @@ function App() {
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/add-product" element={<AddProduct />} />
           <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/orders" element={<Orders />} />
         </Route>

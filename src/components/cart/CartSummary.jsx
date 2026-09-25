@@ -37,7 +37,12 @@ const CartSummary = ({ items }) => {
           </span>
         </div>
 
-        <Button className="w-full" size="lg" disabled={items.length === 0}>
+        <Button
+          className="w-full"
+          size="lg"
+          disabled={items.length === 0}
+          onClick={() => window.location.assign("/checkout")}
+        >
           Proceed to checkout
           <ArrowRight />
         </Button>
