@@ -27,10 +27,10 @@ const Links = () => {
         </li>
         <li>
           <Link
-            to="/about"
+            to="/orders"
             className="transition-colors hover:text-accent-foreground"
           >
-            About
+            Orders
           </Link>
         </li>
         <li>
