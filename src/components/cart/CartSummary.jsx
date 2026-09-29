@@ -8,7 +8,7 @@ const CartSummary = ({ items }) => {
     (total, item) => total + Number(item.price) * item.quantity,
     0,
   );
-  const delivery = subtotal >= 500 ? 0 : 99;
+  const delivery = subtotal >= 5000 ? 0 : 99;
   const total = subtotal + delivery;
 
   return (

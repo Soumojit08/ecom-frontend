@@ -5,6 +5,9 @@ import toast from "react-hot-toast";
 import axiosInstance from "@/lib/axios";
 import { Button } from "@/components/ui/button";
 import useCart from "@/hooks/useCart";
+import { cartKeys } from "@/hooks/useCartData";
+import { orderKeys, useCreateOrder } from "@/hooks/useOrders";
+import { useQueryClient } from "@tanstack/react-query";
 
 const formatPrice = (value) =>
   new Intl.NumberFormat("en-IN", {
@@ -17,11 +20,15 @@ const Payment = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { items } = useCart();
+  const clearCart = useCart((state) => state.clearCart);
+  const createOrderMutation = useCreateOrder();
+  const queryClient = useQueryClient();
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState("idle");
 
   const checkoutData = location.state ?? {};
   const { address, paymentMethod = "razorpay" } = checkoutData;
+  const addressId = checkoutData.addressId ?? address?.id;
 
   const subtotal = useMemo(
     () =>
@@ -34,7 +41,6 @@ const Payment = () => {
 
   const delivery = subtotal >= 5000 ? 0 : 99;
   const total = subtotal + delivery;
-  const totalPaise = Math.round(Number(total) * 100);
 
   useEffect(() => {
     if (!address || items.length === 0) {
@@ -65,9 +71,8 @@ const Payment = () => {
 
   const createRazorpayOrder = async () => {
     const response = await axiosInstance.post("/api/create-order", {
-      amount: totalPaise,
+      addressId,
       currency: "INR",
-      receipt: `receipt_${Date.now()}`,
     });
 
     return response.data?.data ?? response.data;
@@ -82,6 +87,7 @@ const Payment = () => {
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
+      addressId,
     });
 
     return response.data;
@@ -102,7 +108,7 @@ const Payment = () => {
 
       const razorpay = new window.Razorpay({
         key: keyId,
-        amount: totalPaise,
+        amount: orderData.amount,
         currency: "INR",
         name: "E-com Store",
         description: "Order payment",
@@ -118,7 +124,12 @@ const Payment = () => {
             }
 
             setPaymentStatus("success");
-            toast.success("Payment successful");
+            await Promise.all([
+              queryClient.invalidateQueries({ queryKey: orderKeys.all }),
+              queryClient.invalidateQueries({ queryKey: cartKeys.all }),
+            ]);
+            clearCart();
+            toast.success(verification?.msg ?? "Payment successful");
             navigate("/orders", {
               state: {
                 orderPlaced: true,
@@ -128,7 +139,9 @@ const Payment = () => {
             });
           } catch (error) {
             setPaymentStatus("failed");
-            toast.error("Payment verification failed");
+            toast.error(
+              error?.response?.data?.msg ?? "Payment verification failed",
+            );
           } finally {
             setIsProcessing(false);
           }
@@ -169,14 +182,15 @@ const Payment = () => {
       return;
     }
 
-    toast.success("Order placed successfully");
-    navigate("/orders", {
-      state: {
-        orderPlaced: true,
-        paymentMethod,
-        address,
+    createOrderMutation.mutate(
+      { addressId },
+      {
+        onSuccess: () => {
+          clearCart();
+          navigate("/orders");
+        },
       },
-    });
+    );
   };
 
   return (
@@ -201,7 +215,9 @@ const Payment = () => {
                 <div>
                   <p className="font-medium">Selected payment</p>
                   <p className="text-sm text-muted-foreground">
-                    Razorpay standard checkout
+                    {paymentMethod === "razorpay"
+                      ? "Razorpay standard checkout"
+                      : "Cash on delivery"}
                   </p>
                 </div>
               </div>
@@ -276,9 +292,13 @@ const Payment = () => {
                 <Button
                   className="w-full"
                   onClick={handleOrderPlace}
-                  disabled={isProcessing}
+                  disabled={isProcessing || createOrderMutation.isPending}
                 >
-                  {isProcessing ? "Processing..." : `Pay ${formatPrice(total)}`}
+                  {isProcessing || createOrderMutation.isPending
+                    ? "Processing..."
+                    : paymentMethod === "razorpay"
+                      ? `Pay ${formatPrice(total)}`
+                      : "Place order"}
                 </Button>
               </div>
             )}

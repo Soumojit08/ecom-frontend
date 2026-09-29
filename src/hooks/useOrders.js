@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getOrders } from "@/api/orders.api";
+import { cartKeys } from "@/hooks/useCartData";
 import axiosInstance from "@/lib/axios";
 import toast from "react-hot-toast";
 
@@ -27,8 +28,11 @@ export const useCreateOrder = () => {
 
   return useMutation({
     mutationFn: createOrder,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: orderKeys.all });
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: orderKeys.all }),
+        queryClient.invalidateQueries({ queryKey: cartKeys.all }),
+      ]);
       toast.success("Order placed successfully");
     },
     onError: (error) => {

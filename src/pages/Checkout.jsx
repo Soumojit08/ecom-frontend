@@ -59,6 +59,7 @@ const steps = [
 const Checkout = () => {
   const navigate = useNavigate();
   const { items } = useCart();
+  const clearCart = useCart((state) => state.clearCart);
   const createOrderMutation = useCreateOrder();
   const { data: addressData, isLoading: isAddressLoading } = useAddressData();
   const saveAddressMutation = useSaveAddress();
@@ -99,16 +100,6 @@ const Checkout = () => {
     formData.pincode;
 
   const nextStep = () => {
-    if (step === 2) {
-      navigate("/payment", {
-        state: {
-          address: activeAddress,
-          paymentMethod: selectedPayment,
-        },
-      });
-      return;
-    }
-
     setStep((current) => Math.min(current + 1, 3));
   };
   const prevStep = () => setStep((current) => Math.max(current - 1, 1));
@@ -144,27 +135,26 @@ const Checkout = () => {
   const handlePlaceOrder = () => {
     if (items.length === 0 || !activeAddress) return;
 
-    const orderPayload = {
-      id: `ORD-${Date.now()}`,
-      orderId: `ORD-${Date.now()}`,
-      status: "Confirmed",
-      createdAt: new Date().toISOString(),
-      total,
-      subtotal,
-      delivery,
-      paymentMethod: selectedPayment,
-      address: activeAddress,
-      items: items.map((item) => ({
-        id: item.id,
-        name: item.name,
-        quantity: item.quantity,
-        price: Number(item.price),
-      })),
-    };
+    if (selectedPayment === "razorpay") {
+      navigate("/payment", {
+        state: {
+          address: activeAddress,
+          addressId: activeAddress.id,
+          paymentMethod: selectedPayment,
+        },
+      });
+      return;
+    }
 
-    createOrderMutation.mutate(orderPayload, {
-      onSuccess: () => navigate("/orders"),
-    });
+    createOrderMutation.mutate(
+      { addressId: activeAddress.id },
+      {
+        onSuccess: () => {
+          clearCart();
+          navigate("/orders");
+        },
+      },
+    );
   };
 
   const canContinueFromAddress = Boolean(activeAddress) && !showAddressForm;
